@@ -29,7 +29,7 @@ def updateBB(bbs, nSensor, i):
                 new_bb.append(bb)
                 #bb_history[i+1].append(bb)
         '''
-        boxes = customdbscan.customDBSCAN(pointcloud, bb, 0.35, 5)
+        boxes = customdbscan.customDBSCAN(pointcloud, bb, 0.40, 5)
         if boxes:
             for box in boxes:
                 new_bb.append(box)
