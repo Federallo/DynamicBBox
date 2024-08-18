@@ -7,9 +7,9 @@ def pointsInBB(pointcloud, bounding_box):
     #FIXME points must be returned as vector3dvector array
     
     # getting boints of point cloud
-    print("point cloud", pointcloud)
-    print("points", pointcloud.points)
-    print("bounding box", bounding_box)
+    #print("point cloud", pointcloud)
+    #print("points", pointcloud.points)
+    #print("bounding box", bounding_box)
     points = np.asarray(pointcloud.points)
 
     # getting the lower left and upper right corners of the bounding box
@@ -66,12 +66,12 @@ def expandCluster(points, labels, i, neighbours, nCluster, eps, minPts):
 
 def createBoundingBoxes(labels, points):
     boundingBoxes = []
-    uniqueclusters = np.unique(labels) # getting the unique cluster labels
-    for cluster in uniqueclusters:
-        if cluster != -1: # we are ignoring noise points. TODO but maybe we should use blensor analysis repo to analyze them
+    uniqueClusterLabels = np.unique(labels) # getting the unique cluster labels
+    for clusterLabel in uniqueClusterLabels:
+        if clusterLabel != -1: # we are ignoring noise points. TODO but maybe we should use blensor analysis repo to analyze them
 
             clusterPoints = o3d.geometry.PointCloud()
-            clusterPoints.points = o3d.utility.Vector3dVector(points[labels == cluster])
+            clusterPoints.points = o3d.utility.Vector3dVector(points[labels == clusterLabel])
 
             boundingBox = clusterPoints.get_oriented_bounding_box()
             boundingBox.color = [1, 0, 0]
