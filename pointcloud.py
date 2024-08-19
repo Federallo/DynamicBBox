@@ -3,6 +3,7 @@ import open3d as o3d
 
 # generating pointcloud
 # for now pointclouds will be generated filtered and without noise
+# NOTE: pointclouds can be generated in those ways: no noise|filtered
 def generatePointClouds(nSensors, i):
 
     pointclouds = dataset_loader.loadscan(nSensors, i, 0)
@@ -15,10 +16,6 @@ def generatePointClouds(nSensors, i):
         pcd.points = o3d.utility.Vector3dVector(pointcloud)
         pcds.append(pcd)
     
-    #pcd = o3d.geometry.PointCloud()
-    #pcd.points = o3d.utility.Vector3dVector(pointclouds[0])
-
-    
     # combining pointcluds and removing duplicate coordinates
     merged_pcd = o3d.geometry.PointCloud()
 
@@ -28,12 +25,6 @@ def generatePointClouds(nSensors, i):
             if pt not in merged_pcd.points:
                 merged_pcd.points.append(pt)
     
-    '''
-    for pt in pcd.points:
-        if pt not in merged_pcd.points:
-            merged_pcd.points.append(pt)
-    '''
-
     # returning filetered pointcloud
     filtered_pcd = merged_pcd.select_by_index([i for i in range(len(merged_pcd.points)) if merged_pcd.points[i][2] > 0.3])
     return filtered_pcd.voxel_down_sample(voxel_size = 0.25)

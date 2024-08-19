@@ -14,7 +14,7 @@ def updateBB(bbs, nSensor, i):
     new_bb = []
     for bb in bbs:
 
-        boxes = customdbscan.customDBSCAN(pointcloud, bb, 0.40, 5)
+        boxes = customdbscan.customDBSCAN(pointcloud, bb, 0.42, 5)
 
         if boxes:
             for box in boxes:
