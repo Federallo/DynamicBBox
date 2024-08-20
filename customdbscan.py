@@ -4,12 +4,7 @@ import open3d as o3d
 
 def pointsInBB(pointcloud, bounding_box):
 
-    #FIXME points must be returned as vector3dvector array
-    
     # getting boints of point cloud
-    #print("point cloud", pointcloud)
-    #print("points", pointcloud.points)
-    #print("bounding box", bounding_box)
     points = np.asarray(pointcloud.points)
 
     # getting the lower left and upper right corners of the bounding box
@@ -35,15 +30,14 @@ def customDBSCAN(pointcloud, bounding_box, eps, minPts):
             if labels[i] == -1:
                 
                 neighbours = [j for j, point in enumerate(points) if np.linalg.norm(point - points[i]) < eps] # getting the neighbours of points[i] that are within eps distance
-                #print(neighbours)
+
                 if len(neighbours) < minPts:
                     labels[i] = -1 # labeling point as noise because it doesn't have enough neighbours
                 else:
                     nCluster += 1
-                    labels = expandCluster(points, labels, i, neighbours, nCluster, eps, minPts) #TODO check if the function actually saves changes to the labels variable
-                #print(labels)
-        #returning new bounding box (/bounding boxes in case  with the newly discovered clusters
-        #print(labels)
+                    labels = expandCluster(points, labels, i, neighbours, nCluster, eps, minPts)
+
+        #returning new bounding box (/bounding boxes in case with the newly discovered clusters)
         return createBoundingBoxes(labels, points)
     else:
         return None

@@ -10,7 +10,7 @@ bounding_box = blensoranalysis.generateBoundingBoxes(1, 20)
 
 # TODO implement multiple scans
 # NOTE: currently is used only one scan, but in the future will be used multiple scans
-for i in range(20, 21):#scans+
+for i in range(20, 24):#scans+
 
     tracked_bb = bbtracking.updateBB(bounding_box, 1, i) # it is analyzed the next point cloud
     bbtracking.displayBoundingBoxes(tracked_bb)
