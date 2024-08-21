@@ -40,7 +40,7 @@ def customDBSCAN(pointcloud, bounding_box, eps, minPts):
         #returning new bounding box (/bounding boxes in case with the newly discovered clusters)
         return createBoundingBoxes(labels, points)
     else:
-        return None
+        return None, None
 
 # TODO maybe consider also the rest of the pointcloud
 def expandCluster(points, labels, i, neighbours, nCluster, eps, minPts):
@@ -68,9 +68,8 @@ def createBoundingBoxes(labels, points):
 
             clusterPoints = o3d.geometry.PointCloud()
             clusterPoints.points = o3d.utility.Vector3dVector(points[labels == clusterLabel])
-
-            # drawing clusters
-            clusterPoints.color = [0, 0, 1] # blue
+            
+            #returning clusters
             clusters.append(clusterPoints)
             
             # creating bounding boxes for each cluster
