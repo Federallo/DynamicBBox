@@ -25,5 +25,5 @@ def updateBB(bbs, nSensor, i):
 
     return new_bb, new_clusters
 
-def displayBoundingBoxes(bbs):
-    o3d.visualization.draw([*bbs], show_skybox=False)
+def displayBoundingBoxes(bbs, clusters):
+    o3d.visualization.draw([*clusters, *bbs], show_skybox=False)
