@@ -12,15 +12,18 @@ def updateBB(bbs, nSensor, i):
 
     # updating every single bounding box
     new_bb = []
+    new_clusters = []
     for bb in bbs:
 
-        boxes = customdbscan.customDBSCAN(pointcloud, bb, 0.47, 6)
+        boxes, clusters = customdbscan.customDBSCAN(pointcloud, bb, 0.47, 6)
 
         if boxes:
             for box in boxes:
                 new_bb.append(box)
+            for cluster in clusters:
+                new_clusters.append(cluster)
 
-    return new_bb
+    return new_bb, new_clusters
 
 def displayBoundingBoxes(bbs):
     o3d.visualization.draw([*bbs], show_skybox=False)

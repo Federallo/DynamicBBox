@@ -42,7 +42,7 @@ def customDBSCAN(pointcloud, bounding_box, eps, minPts):
     else:
         return None
 
-
+# TODO maybe consider also the rest of the pointcloud
 def expandCluster(points, labels, i, neighbours, nCluster, eps, minPts):
 
     # assing the current point to a cluster
