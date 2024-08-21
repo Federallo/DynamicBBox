@@ -53,14 +53,14 @@ def customDBSCAN(pointcloud, bounding_box, bb_expansion_factor, eps, minPts):
         #returning new bounding box (/bounding boxes in case with the newly discovered clusters)
         return createBoundingBoxes(labels, points)
     else:
-        return None
+        return None, None
 
-
+# TODO maybe consider also the rest of the pointcloud
 def expandCluster(points, labels, i, neighbours, nCluster, eps, minPts):
 
     # assing the current point to a cluster
     labels[i] = nCluster
-    #print(labels)
+
     for j in neighbours:
         #checking if the current point is labeled as noise
         if labels[j] == -1:
@@ -71,16 +71,22 @@ def expandCluster(points, labels, i, neighbours, nCluster, eps, minPts):
                 neighbours += newNeighbours
     return labels
 
+# TODO consider only the bigger cluster
 def createBoundingBoxes(labels, points):
     boundingBoxes = []
+    clusters = []
     uniqueClusterLabels = np.unique(labels) # getting the unique cluster labels
     for clusterLabel in uniqueClusterLabels:
         if clusterLabel != -1: # we are ignoring noise points. TODO but maybe we should use blensor analysis repo to analyze them
 
             clusterPoints = o3d.geometry.PointCloud()
             clusterPoints.points = o3d.utility.Vector3dVector(points[labels == clusterLabel])
-
+            
+            #returning clusters
+            clusters.append(clusterPoints)
+            
+            # creating bounding boxes for each cluster
             boundingBox = clusterPoints.get_oriented_bounding_box()
             boundingBox.color = [1, 0, 0]
             boundingBoxes.append(boundingBox)
-    return boundingBoxes
+    return boundingBoxes, clusters
