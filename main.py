@@ -2,6 +2,7 @@ import bbtracking
 import blensoranalysis
 
 tracked_bb = []
+tracked_clusters = []
 
 # NOTE: pointclouds can be generated in those ways: no noise|filtered
 
@@ -12,5 +13,5 @@ bounding_box = blensoranalysis.generateBoundingBoxes(1, 20)
 # NOTE: currently is used only one scan, but in the future will be used multiple scans
 for i in range(20, 24):#scans+
 
-    tracked_bb = bbtracking.updateBB(bounding_box, 1, i) # it is analyzed the next point cloud
-    bbtracking.displayBoundingBoxes(tracked_bb)
+    tracked_bb, tracked_clusters = bbtracking.updateBB(bounding_box, 1, i) # it analyses the next point cloud
+    bbtracking.displayBoundingBoxes(tracked_bb, tracked_clusters)
