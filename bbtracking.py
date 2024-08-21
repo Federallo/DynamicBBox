@@ -14,8 +14,9 @@ def updateBB(bbs, nSensor, i):
     new_bb = []
     new_clusters = []
     for bb in bbs:
-
-        boxes = customdbscan.customDBSCAN(pointcloud, bb, 0.1, 0.43, 5)
+        
+        # TODO adjust bounding box enlargement factor
+        boxes, clusters = customdbscan.customDBSCAN(pointcloud, bb, 0.1, 0.43, 5)
 
         if boxes:
             for box in boxes:
