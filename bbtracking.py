@@ -16,7 +16,7 @@ def updateBB(bbs, nSensor, i):
     for bb in bbs:
         
         # TODO adjust bounding box enlargement factor
-        boxes, clusters = customdbscan.customDBSCAN(pointcloud, bb, 0.1, 0.43, 5)
+        boxes, clusters = customdbscan.customDBSCAN(pointcloud, bb, 0.9, 1.5, 5)
 
         if boxes:
             for box in boxes:

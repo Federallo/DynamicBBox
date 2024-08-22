@@ -26,10 +26,6 @@ def customDBSCAN(pointcloud, bounding_box, bb_expansion_factor, eps, minPts):
     # expanding the bounding box with a certain value in case the object is moving and it needs to be tracked
     # creating a new function because bounding_box is readonly
     bounding_box = expand_bounding_box(bounding_box, bb_expansion_factor)
-    '''
-    o3d.visualization.draw(bounding_box, show_skybox=False)
-    return None
-    '''
 
     # getting the points that are within the bounding box  
     points = pointsInBB(pointcloud, bounding_box) 
