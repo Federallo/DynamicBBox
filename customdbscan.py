@@ -42,7 +42,6 @@ def customDBSCAN(pointcloud, bounding_box, eps, minPts):
     else:
         return None, None
 
-# TODO maybe consider also the rest of the pointcloud
 def expandCluster(points, labels, i, neighbours, nCluster, eps, minPts):
 
     # assing the current point to a cluster
@@ -58,22 +57,30 @@ def expandCluster(points, labels, i, neighbours, nCluster, eps, minPts):
                 neighbours += newNeighbours
     return labels
 
-# TODO consider only the bigger cluster
+# considering only the bigger cluster
 def createBoundingBoxes(labels, points):
+
+    # generating bounding box and cluster that
     boundingBoxes = []
     clusters = []
-    uniqueClusterLabels = np.unique(labels) # getting the unique cluster labels
-    for clusterLabel in uniqueClusterLabels:
-        if clusterLabel != -1: # we are ignoring noise points. TODO but maybe we should use blensor analysis repo to analyze them
 
-            clusterPoints = o3d.geometry.PointCloud()
-            clusterPoints.points = o3d.utility.Vector3dVector(points[labels == clusterLabel])
+    # excluding noise 
+    effectiveLabels = labels[labels != -1]
+
+    if len(effectiveLabels) != 0:
+
+        uniqueClusterLabels, countClusterLabels = np.unique(labels, return_counts=True) # getting the unique cluster labels and their counts
+        mostFrequentClusterLabel = uniqueClusterLabels[np.argmax(countClusterLabels)] # getting the most frequent cluster label
+
+        clusterPoints = o3d.geometry.PointCloud()
+        clusterPoints.points = o3d.utility.Vector3dVector(points[labels == mostFrequentClusterLabel])
             
-            #returning clusters
-            clusters.append(clusterPoints)
+        #returning clusters
+        clusters.append(clusterPoints)
             
-            # creating bounding boxes for each cluster
-            boundingBox = clusterPoints.get_oriented_bounding_box()
-            boundingBox.color = [1, 0, 0]
-            boundingBoxes.append(boundingBox)
+        # creating bounding boxes for each cluster
+        boundingBox = clusterPoints.get_oriented_bounding_box()
+        boundingBox.color = [1, 0, 0]
+        boundingBoxes.append(boundingBox)
+
     return boundingBoxes, clusters
