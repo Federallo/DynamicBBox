@@ -1,7 +1,6 @@
 import numpy as np
 import open3d as o3d
 
-
 def pointsInBB(pointcloud, bounding_box):
 
     # getting boints of point cloud
@@ -21,6 +20,7 @@ def pointsInBB(pointcloud, bounding_box):
 def customDBSCAN(pointcloud, bounding_box, eps, minPts):
 
     points = pointsInBB(pointcloud, bounding_box) # getting the points that are within the bounding box   
+
     if points.any(): # checking if there are any points in the bounding box
 
         labels = np.zeros(len(points)) -1 # initializing all points as noise (-1)

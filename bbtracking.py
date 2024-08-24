@@ -2,8 +2,26 @@ import pointcloud as pc
 import customdbscan
 import open3d as o3d
 import numpy as np
+import blensoranalysis
 
 # NOTE: the bounding boxes of the custom cluster must be OrientedBoudingBox type, the same as the ones in blensory_analysis repo
+
+def findPointsOutsideBB(pointcloud, clusters):
+    
+    # creating a mask to remove all the existing clusters from pointcloud
+    set1 = set(tuple(point) for point in pointcloud.points)
+    if clusters:
+        set2 = set(tuple(point) for cluster in clusters for point in cluster.points)
+        points = set1 - set2
+        
+        remainingPoints = np.array([np.array(point) for point in points])
+        if remainingPoints.any():
+            pointcloud = o3d.geometry.PointCloud()
+            pointcloud.points = o3d.utility.Vector3dVector(remainingPoints)
+
+        return pointcloud
+        
+
 
 def updateBB(bbs, nSensor, i):
 
@@ -11,19 +29,28 @@ def updateBB(bbs, nSensor, i):
     pointcloud = pc.generatePointClouds(nSensor, i+1)
 
     # updating every single bounding box
-    new_bb = []
-    new_clusters = []
+    newBB = []
+    newClusters = []
     for bb in bbs:
 
-        boxes, clusters = customdbscan.customDBSCAN(pointcloud, bb, 0.47, 6)
+        boxes, clusters = customdbscan.customDBSCAN(pointcloud, bb, 1.5, 5)#FIXME bounding box not displayed correctly
 
         if boxes:
             for box in boxes:
-                new_bb.append(box)
+                newBB.append(box)
             for cluster in clusters:
-                new_clusters.append(cluster)
+                newClusters.append(cluster)
+    #TODO
+    '''
+    remainingPoints = findPointsOutsideBB(pointcloud, newClusters)
+    discoveredBoxes = []
+    if len(remainingPoints.points) > 10:
+        discoveredBoxes = blensoranalysis.generateBB(remainingPoints)
+        for discovederedBox in discoveredBoxes:
+            newBB.append(discovederedBox)
 
-    return new_bb, new_clusters
+    return newBB, newClusters # pointcloud
+    '''
 
-def displayBoundingBoxes(bbs, clusters):
-    o3d.visualization.draw([*clusters, *bbs], show_skybox=False)
+def displayBoundingBoxes(bbs, pointcloud):
+    o3d.visualization.draw([*pointcloud, *bbs], show_skybox=False) #TODO remove *
