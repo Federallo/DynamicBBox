@@ -1,0 +1,27 @@
+% setting document languate
+\documentclass[italian]{article}
+
+% setting italian font encoding
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+
+\begin{document}
+\section{Introduzione}
+Il seguente progetto consiste nell'aggiornare i bounding box generati inizialmente dall'algoritmo della repository blensor\_analysis.\\
+Per poter inizializzare il cluster all'interno della bounding box, è stato utilizzato un algoritmo di DBSCAN custom, il quale prende come argomenti la bounding box dello scan corrente e la point cloud dello scan successivo.\\
+Una volta determinati i punti interni alla bounding box, seleziona il cluster con più punti al suo interno, il quale rappresenta l'oggetto relativo alla bounding box, e ne crea un nuovo bounding box.\\
+In caso ci fossero dei punti esterni dai bounding box, questi vengono analizzati dall'algoritmo della repository blensor\_analysis e, in caso venissero indivduate nuovi bounding box, nuovi aggiunti alla lista di bounding box da aggiornare.\\
+\section{Descrizione dei file}
+Nella seguente sezione vengono trattate nel dettaglio i singoli file del progetto.
+\subsection{blensoranalysis}
+Il file blensoranalysis presenta metodi che servono da tramite tra DynamicBBox e la repository blensor\_analysis.
+\subsubsection{generateBoundingBox}
+%TODO aggiungi lo scan e la filtered value
+Il seguente metodo viene utilizzato per generare le prime bounding boxes a primo avvio del programma e vengono mostrate anche in output tramite liberia open3d.
+\subsubsection{generateBB}
+In generateBB le bounding box vengono generate tramite pointcloud data in input e vengono, in un momento successivo, aggiunte alla lista di bounding box aggiornate.
+\subsection{main}
+Il file main.py è il file principale del progetto, il quale inizializza le prime bounding box utilizzando metodi presenti nella repository blensor\_analysis utilizzando la libreria blensoranalysis che funge da tramite tra DynamicBBox e blensor\_analysis.\\
+I prossimi scan vengono inizializzati tramite ciclo for
+\end{document}
