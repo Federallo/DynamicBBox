@@ -40,17 +40,16 @@ def updateBB(bbs, nSensor, i):
                 newBB.append(box)
             for cluster in clusters:
                 newClusters.append(cluster)
-    #TODO
-    '''
+    
     remainingPoints = findPointsOutsideBB(pointcloud, newClusters)
     discoveredBoxes = []
+    #FIXME graphical glitch caused by blensor_analysis (from 28 to 30)
     if len(remainingPoints.points) > 10:
         discoveredBoxes = blensoranalysis.generateBB(remainingPoints)
         for discovederedBox in discoveredBoxes:
             newBB.append(discovederedBox)
 
     return newBB, newClusters # pointcloud
-    '''
 
 def displayBoundingBoxes(bbs, pointcloud):
     o3d.visualization.draw([*pointcloud, *bbs], show_skybox=False) #TODO remove *
