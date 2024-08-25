@@ -20,6 +20,26 @@ def findPointsOutsideBB(pointcloud, clusters):
             pointcloud.points = o3d.utility.Vector3dVector(remainingPoints)
 
         return pointcloud
+
+def removeOverlappingBoxes(bbs):
+    
+    for box1 in bbs:
+        boxCorners1 = box1.get_box_points()
+        for box2 in bbs:
+            boxCorners2 = box2.get_box_points()
+            xmin_overlap = max(np.min(np.asarray(boxCorners1)[:,0]), np.min(np.asarray(boxCorners2)[:,0]))
+            xmax_overlap = min(np.max(np.asarray(boxCorners1)[:,0]), np.max(np.asarray(boxCorners2)[:,0]))
+            ymin_overlap = max(np.min(np.asarray(boxCorners1)[:,1]), np.min(np.asarray(boxCorners2)[:,1]))
+            ymax_overlap = min(np.max(np.asarray(boxCorners1)[:,1]), np.max(np.asarray(boxCorners2)[:,1]))
+
+
+            # checking if there i overlap between the two boxes
+            if xmin_overlap < xmax_overlap and ymin_overlap < ymax_overlap and box1 != box2:
+                if box1.volume() > box2.volume():
+                    bbs.remove(box2)
+                else:
+                    bbs.remove(box1)
+    
         
 
 
@@ -33,7 +53,7 @@ def updateBB(bbs, nSensor, i):
     newClusters = []
     for bb in bbs:
 
-        boxes, clusters = customdbscan.customDBSCAN(pointcloud, bb, 1.5, 5)#FIXME bounding box not displayed correctly
+        boxes, clusters = customdbscan.customDBSCAN(pointcloud, bb, 1.5, 5)
 
         if boxes:
             for box in boxes:
@@ -43,13 +63,15 @@ def updateBB(bbs, nSensor, i):
     
     remainingPoints = findPointsOutsideBB(pointcloud, newClusters)
     discoveredBoxes = []
-    #FIXME graphical glitch caused by blensor_analysis (from 28 to 30)
+
     if len(remainingPoints.points) > 10:
         discoveredBoxes = blensoranalysis.generateBB(remainingPoints)
         for discovederedBox in discoveredBoxes:
             newBB.append(discovederedBox)
 
-    return newBB, newClusters # pointcloud
+    removeOverlappingBoxes(newBB)
+
+    return newBB, pointcloud
 
 def displayBoundingBoxes(bbs, pointcloud):
-    o3d.visualization.draw([*pointcloud, *bbs], show_skybox=False) #TODO remove *
+    o3d.visualization.draw([pointcloud, *bbs], show_skybox=False) #TODO remove *
