@@ -14,14 +14,40 @@ Una volta determinati i punti interni alla bounding box, seleziona il cluster co
 In caso ci fossero dei punti esterni dai bounding box, questi vengono analizzati dall'algoritmo della repository blensor\_analysis e, in caso venissero indivduate nuovi bounding box, nuovi aggiunti alla lista di bounding box da aggiornare.\\
 \section{Descrizione dei file}
 Nella seguente sezione vengono trattate nel dettaglio i singoli file del progetto.
+\subsection{pointcloud}
+Il seguente file contiene un solo metodo, generatePointCloud, il quale permette di generare la point cloud senza noise e filtrate a partire dal file .csv.\\
 \subsection{blensoranalysis}
 Il file blensoranalysis presenta metodi che servono da tramite tra DynamicBBox e la repository blensor\_analysis.
-\subsubsection{generateBoundingBox}
-%TODO aggiungi lo scan e la filtered value
-Il seguente metodo viene utilizzato per generare le prime bounding boxes a primo avvio del programma e vengono mostrate anche in output tramite liberia open3d.
-\subsubsection{generateBB}
-In generateBB le bounding box vengono generate tramite pointcloud data in input e vengono, in un momento successivo, aggiunte alla lista di bounding box aggiornate.
+\begin{itemize}
+		\item generateBoundingBox: il seguente metodo viene utilizzato per generare le bounding boxes al primo avvio del programma e vengono mostrate in output tramite liberia open3d. Come argomenti prende
+			l'indice dello scan e il numero di sensori che eseguono lo scan. 
+ 		\item generateBB: genera le bounding box tramite pointcloud data in input e vengono aggiunte, in un momento successivo, alla lista di bounding box aggiornate.
+\end{itemize}
+\subsection{customdbscan}
+In customdbscan viene preso l'algoritmo di DBSCAN e viene adattato allo scopo del progetto.\\
+Sono stati implementati due modi diversi:
+\subsubsection{Espansione della bounding box}
+In questo caso le bounding box vengono prima espanse e successivamente vengono clusterizzati i punti al loro interno.
+I metodi implementati sono:
+\begin{itemize}
+	\item customDBSCAN: il metodo customDBSCAN prende come argomenti le point clouds dello scan successivo, la bounding box, il fattore di espansione delle bounding boxes, eps (distanza massima tra due punti per essere considerati nello stesso cluster) e minPts (numero minimo di punti per formare un cluster).\\ Inizialmente individua i punti interno alla bounding box. Successivamente li clusterizza assegnandogli un label.
+	\item expandCluster: rappresenta il metodo che esegue la ricerca dei punti a distanza eps ddai neighbours e li aggiunge al cluster.
+	\item expand\_bounding\_: è la funzione che espande effettivamente la bounding box data in input.
+	\item pointsInBB: individua i punti interni alla bounding box.
+	\item createBoundingBoxes: è la funzione che crea la bounding box dati i labels dei punti interni alla bounding box. Essenzialmente rimuove tutti quei label che individuano cluster più piccoli e crea la bounding box relativa al cluster più grande.
+\end{itemize}
+\subsubsection{Clusterizzazione dei punti vicini alla bounding box}
+Rispetto al metodo precedente, non viene espansa la bounding box e nei metodi customDBSCAN e expandCluster vengono considerati anche i punti esterni alla bounding box. Quelli che sono vicini vengono aggiunti all lista dei points e dei labels.
+\subsection{bbtracking}
+Il seguente file presenta i seguenti metodi:
+\begin{itemize}
+	\item updateBB: il metodo updateBB aggiorna le buonding boxes date in input considerando le point clouds dello scan successivo usando customDBSCAN. Successivamente vengono analizzate le eventuali restanti point clouds che no		n erano presenti all'interno delle bounding boxes e ne vengono create nuove tramite. Se delle bounding box si sovrappongono, vengono rimosse quelle più piccole.
+	\item findPointsOutsideBB: rappresenta la funzione che trova i punti esterni alle bounding boxes.
+	\item removeOverlappingBoxes: rimuove le bounding boxes che si sovrappongono.
+	\item displayBoundingBoxes: mostra le bounding boxes e le point clouds tramite open3d.
+\end{itemize}
 \subsection{main}
-Il file main.py è il file principale del progetto, il quale inizializza le prime bounding box utilizzando metodi presenti nella repository blensor\_analysis utilizzando la libreria blensoranalysis che funge da tramite tra DynamicBBox e blensor\_analysis.\\
-I prossimi scan vengono inizializzati tramite ciclo for
+Il file main.py è il file principale del progetto, il quale inizializza le prime bounding box utilizzando metodi presenti nella repository blensor\_analysis implementati in blensoranalysis. Quest'ultima funge da tramite tra DynamicBBox e blensor\_analysis.\\
+Tramite ciclo for vengono aggiornate le bounding boxes in base agli scan successivi.
+\subsection{point}
 \end{document}
