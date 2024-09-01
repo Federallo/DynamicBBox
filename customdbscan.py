@@ -1,7 +1,6 @@
 import numpy as np
 import open3d as o3d
 
-
 def pointsInBB(pointcloud, bounding_box):
 
     # getting boints of point cloud

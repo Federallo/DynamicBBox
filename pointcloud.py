@@ -28,6 +28,3 @@ def generatePointClouds(nSensors, i):
     # returning filetered pointcloud
     filtered_pcd = merged_pcd.select_by_index([i for i in range(len(merged_pcd.points)) if merged_pcd.points[i][2] > 0.3])
     return filtered_pcd.voxel_down_sample(voxel_size = 0.25)
-
-def displayPointCloud(pcd):
-    o3d.visualization.draw([pcd], show_skybox=False)
