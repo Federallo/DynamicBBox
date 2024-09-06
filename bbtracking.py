@@ -1,5 +1,5 @@
 import pointcloud as pc
-import customdbscan
+import dbscan_expand_bbox as dbscan1
 import open3d as o3d
 import numpy as np
 import blensoranalysis
@@ -18,6 +18,12 @@ def findPointsOutsideBB(pointcloud, clusters):
         if remainingPoints.any():
             pointcloud = o3d.geometry.PointCloud()
             pointcloud.points = o3d.utility.Vector3dVector(remainingPoints)
+            '''
+            print("printing new pointcloud")
+            for pts in pointcloud.points:
+                print(pts)
+            print("end")
+            '''
 
         return pointcloud
 
@@ -51,9 +57,10 @@ def updateBB(bbs, nSensor, i):
     # updating every single bounding box
     newBB = []
     newClusters = []
+
     for bb in bbs:
 
-        boxes, clusters = customdbscan.customDBSCAN(pointcloud, bb, 0.6, 1.5, 5)
+        boxes, clusters = dbscan1.customDBSCAN(pointcloud, bb, 1.5, 5, 2.5)
 
         if boxes:
             for box in boxes:
@@ -63,13 +70,15 @@ def updateBB(bbs, nSensor, i):
     
     remainingPoints = findPointsOutsideBB(pointcloud, newClusters)
     discoveredBoxes = []
-
-    if len(remainingPoints.points) > 10:
+    
+    #TODO adjust the number of points to consider
+    if len(remainingPoints.points) > 20:
         discoveredBoxes = blensoranalysis.generateBB(remainingPoints)
         for discovederedBox in discoveredBoxes:
             newBB.append(discovederedBox)
 
     removeOverlappingBoxes(newBB)
+    
 
     return newBB, pointcloud
 
