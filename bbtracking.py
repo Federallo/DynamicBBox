@@ -18,10 +18,12 @@ def findPointsOutsideBB(pointcloud, clusters):
         if remainingPoints.any():
             pointcloud = o3d.geometry.PointCloud()
             pointcloud.points = o3d.utility.Vector3dVector(remainingPoints)
-            print("AAAAA")
+            '''
+            print("printing new pointcloud")
             for pts in pointcloud.points:
                 print(pts)
-            print("AAAAA")
+            print("end")
+            '''
 
         return pointcloud
 
@@ -55,6 +57,8 @@ def updateBB(bbs, nSensor, i):
     # updating every single bounding box
     newBB = []
     newClusters = []
+
+
     for bb in bbs:
 
         boxes, clusters = customdbscan.customDBSCAN(pointcloud, bb, 1.5, 5, 2.5)
@@ -80,4 +84,4 @@ def updateBB(bbs, nSensor, i):
     return newBB, pointcloud
 
 def displayBoundingBoxes(bbs, pointcloud):
-    o3d.visualization.draw([pointcloud, *bbs], show_skybox=False) #TODO remove *
+    o3d.visualization.draw([pointcloud, *bbs], show_skybox=False) 
