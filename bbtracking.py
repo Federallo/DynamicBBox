@@ -1,5 +1,6 @@
 import pointcloud as pc
 import dbscan_expand_bbox as dbscan1
+import dbscan_near_search as dbscan2
 import open3d as o3d
 import numpy as np
 import blensoranalysis
@@ -49,7 +50,7 @@ def removeOverlappingBoxes(bbs):
         
 
 
-def updateBB(bbs, nSensor, i):
+def updateBB(bbs, nSensor, i, nMethod):
 
     # loading the next scan
     pointcloud = pc.generatePointClouds(nSensor, i+1)
@@ -59,8 +60,11 @@ def updateBB(bbs, nSensor, i):
     newClusters = []
 
     for bb in bbs:
-
-        boxes, clusters = dbscan1.customDBSCAN(pointcloud, bb, 0.6, 1.5, 5)
+        
+        if nMethod == 1:
+            boxes, clusters = dbscan1.customDBSCAN(pointcloud, bb, 0.6, 1.5, 5)
+        elif nMethod == 2:
+            boxes, clusters = dbscan2.customDBSCAN(pointcloud, bb, 1.5, 5, 1.5)
 
         if boxes:
             for box in boxes:
