@@ -22,8 +22,6 @@ def customDBSCAN(pointcloud, bounding_box, eps, minPts, expanseFactor):
 
     points = pointsInBB(pointcloud, bounding_box) # getting the points that are within the bounding box   
 
-    pointcloud = np.asarray(pointcloud.points)
-
     if points.any(): # checking if there are any points in the bounding box
 
         labels = np.zeros(len(points)) -1 # initializing all points as noise (-1)
@@ -32,14 +30,15 @@ def customDBSCAN(pointcloud, bounding_box, eps, minPts, expanseFactor):
         for i in range(len(points)):
             if labels[i] == -1:
 
-                for j in range(len(pointcloud)):
+                for j in range(len(pointcloud.points)):
 
-                    if pointcloud[j] not in points:  # Check if point is outside the bounding box
+                    if pointcloud.points[j] not in points:  # Check if point is outside the bounding box
 
                         # adding new pointcloud in case is close to the points inside the bounding box
-                        if np.linalg.norm(pointcloud[j]-points[i]) < expanseFactor: #(pointcloud[j] - nearestPoint(pointcloud[j], points))
+                        if np.linalg.norm(pointcloud.points[j]-points[i]) < expanseFactor:
                             labels = np.concatenate((labels, [labels[i]])) 
-                            points = np.concatenate((points, [pointcloud[j]]))
+                            pointcloud.colors[j] = [0,1,0] 
+                            points = np.concatenate((points, [pointcloud.points[j]]))
 
                 neighbours = [j for j, point in enumerate(points) if np.linalg.norm(point - points[i]) < eps] # getting the neighbours of points[i] that are within eps distance
 
@@ -64,14 +63,15 @@ def expandCluster(points, labels, i, neighbours, nCluster, eps, minPts, pointclo
         if labels[j] == -1:
             labels[j] = nCluster
         
-            for l in range(len(pointcloud)):
+            for l in range(len(pointcloud.points)):
 
-                if pointcloud[l] not in points:  # Check if point is outside the bounding box
+                if pointcloud.points[l] not in points:  # Check if point is outside the bounding box
 
                         # adding new pointcloud in case is close to the points inside the bounding box
-                        if np.linalg.norm(pointcloud[l]-points[j]) < expanseFactor: #(pointcloud[j] - nearestPoint(pointcloud[j], points))
+                        if np.linalg.norm(pointcloud.points[l]-points[j]) < expanseFactor:
                             labels = np.concatenate((labels, [labels[j]])) 
-                            points = np.concatenate((points, [pointcloud[l]]))
+                            pointcloud.colors[j] = [0,1,0]                           
+                            points = np.concatenate((points, [pointcloud.points[l]]))
 
 
             #seraching for new neighbours to add to "neighbours" variable

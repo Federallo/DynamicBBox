@@ -1,5 +1,6 @@
 from _blensor_analysis import dataset_loader
 import open3d as o3d
+import numpy as np
 
 # generating pointcloud
 # for now pointclouds will be generated filtered and without noise
@@ -24,6 +25,10 @@ def generatePointClouds(nSensors, i):
         for pt in pcd.points:
             if pt not in merged_pcd.points:
                 merged_pcd.points.append(pt)
+
+    numPoints = len(merged_pcd.points)
+    blackColors = np.zeros((numPoints, 3))
+    merged_pcd.colors = o3d.utility.Vector3dVector(blackColors)
     
     # returning filetered pointcloud
     filtered_pcd = merged_pcd.select_by_index([i for i in range(len(merged_pcd.points)) if merged_pcd.points[i][2] > 0.3])
