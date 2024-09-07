@@ -55,6 +55,9 @@ def updateBB(bbs, nSensor, i, nMethod):
     # loading the next scan
     pointcloud = pc.generatePointClouds(nSensor, i+1)
 
+    # displaying pointcloud of the next scan and the bounding boxes
+    o3d.visualization.draw([pointcloud, *bbs], show_skybox = False)
+
     # updating every single bounding box
     newBB = []
     newClusters = []
@@ -64,7 +67,7 @@ def updateBB(bbs, nSensor, i, nMethod):
         if nMethod == 1:
             boxes, clusters = dbscan1.customDBSCAN(pointcloud, bb, 0.6, 1.5, 5)
         elif nMethod == 2:
-            boxes, clusters = dbscan2.customDBSCAN(pointcloud, bb, 1.5, 5, 1.5)
+            boxes, clusters = dbscan2.customDBSCAN(pointcloud, bb, 1.5, 5, 2)
 
         if boxes:
             for box in boxes:
@@ -79,6 +82,7 @@ def updateBB(bbs, nSensor, i, nMethod):
     if len(remainingPoints.points) > 20:
         discoveredBoxes = blensoranalysis.generateBB(remainingPoints)
         for discovederedBox in discoveredBoxes:
+            print("discovered boxes", discoveredBoxes)
             newBB.append(discovederedBox)
 
     removeOverlappingBoxes(newBB)
