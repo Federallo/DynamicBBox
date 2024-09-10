@@ -13,14 +13,18 @@ def pointsInBB(pointcloud, bounding_box):
     # getting indices of points within the bounding box (if there are any)
     indices = [i for i, point in enumerate(points) if min_point[0] <= point[0] <= max_point[0] and min_point[1] <= point[1] <= max_point[1] and min_point[2] <= point[2] <= max_point[2]]
 
-    points_in_box = points[indices]
-    
-    return points_in_box
+    # creating array of points within the bounding box
+    pointsInBox = points[indices]
 
+    #gettung the indices of the remaining points 
+    remainingIndices = np.setdiff1d(np.arange(len(points)), indices)
+    pointsOutBox = points[remainingIndices]
+    
+    return pointsInBox, pointsOutBox
 
 def customDBSCAN(pointcloud, bounding_box, eps, minPts, expanseFactor):
 
-    points = pointsInBB(pointcloud, bounding_box) # getting the points that are within the bounding box   
+    points, remainingPoints = pointsInBB(pointcloud, bounding_box) # getting the points that are within the bounding box
 
     if points.any(): # checking if there are any points in the bounding box
 
@@ -32,14 +36,14 @@ def customDBSCAN(pointcloud, bounding_box, eps, minPts, expanseFactor):
 
                 for j in range(len(pointcloud.points)):
 
-                    if pointcloud.points[j] not in points:  # Check if point is outside the bounding box
+                    if not pointcloud.points[j] in points:  # Check if point is outside the bounding box
 
                         # adding new pointcloud in case is close to the points inside the bounding box
                         if np.linalg.norm(pointcloud.points[j]-points[i]) < expanseFactor:
                             labels = np.concatenate((labels, [labels[i]])) 
                             pointcloud.colors[j] = [0,1,0] 
                             points = np.concatenate((points, [pointcloud.points[j]]))
-
+                            
                 neighbours = [j for j, point in enumerate(points) if np.linalg.norm(point - points[i]) < eps] # getting the neighbours of points[i] that are within eps distance
 
                 if len(neighbours) < minPts:
@@ -65,14 +69,13 @@ def expandCluster(points, labels, i, neighbours, nCluster, eps, minPts, pointclo
         
             for l in range(len(pointcloud.points)):
 
-                if pointcloud.points[l] not in points:  # Check if point is outside the bounding box
+                if not pointcloud.points[l] in points:  # Check if point is outside the bounding box
 
-                        # adding new pointcloud in case is close to the points inside the bounding box
-                        if np.linalg.norm(pointcloud.points[l]-points[j]) < expanseFactor:
-                            labels = np.concatenate((labels, [labels[j]])) 
-                            pointcloud.colors[j] = [0,1,0]                           
-                            points = np.concatenate((points, [pointcloud.points[l]]))
-
+                    # adding new pointcloud in case is close to the points inside the bounding box
+                    if np.linalg.norm(pointcloud.points[l]-points[j]) < expanseFactor:
+                        labels = np.concatenate((labels, [labels[j]])) 
+                        pointcloud.colors[l] = [0,1,0]                           
+                        points = np.concatenate((points, [pointcloud.points[l]]))
 
             #seraching for new neighbours to add to "neighbours" variable
             newNeighbours = [k for k, point in enumerate(points) if np.linalg.norm(point - points[j]) < eps]
