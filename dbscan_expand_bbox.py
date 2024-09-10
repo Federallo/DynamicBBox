@@ -39,9 +39,9 @@ def customDBSCAN(pointcloud, boundingBox, bbExpansionFactor, eps, minPts):
                     labels = expandCluster(points, labels, i, neighbours, nCluster, eps, minPts)
 
         #returning new bounding box (/bounding boxes in case with the newly discovered clusters)
-        return createBoundingBoxes(labels, points)
+        return createBoundingBoxes(labels, points, boundingBox)
     else:
-        return None, None
+        return None, None, None
 
 def expandCluster(points, labels, i, neighbours, nCluster, eps, minPts):
 
@@ -59,7 +59,7 @@ def expandCluster(points, labels, i, neighbours, nCluster, eps, minPts):
     return labels
 
 # considering only the bigger cluster
-def createBoundingBoxes(labels, points):
+def createBoundingBoxes(labels, points, expandedBox):
 
     # generating bounding box and cluster that
     boundingBoxes = []
@@ -84,4 +84,4 @@ def createBoundingBoxes(labels, points):
         boundingBox.color = [1, 0, 0]
         boundingBoxes.append(boundingBox)
 
-    return boundingBoxes, clusters
+    return boundingBoxes, clusters, expandedBox

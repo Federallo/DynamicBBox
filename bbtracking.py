@@ -61,11 +61,11 @@ def updateBB(bbs, nSensor, i, nMethod):
     # updating every single bounding box
     newBB = []
     newClusters = []
-
+    expandedBoxes = []
     for bb in bbs:
         
         if nMethod == 1:
-            boxes, clusters = dbscan1.customDBSCAN(pointcloud, bb, 0.6, 1.5, 5)
+            boxes, clusters, expandedBox = dbscan1.customDBSCAN(pointcloud, bb, 0.6, 1.5, 5)
         elif nMethod == 2:
             boxes, clusters = dbscan2.customDBSCAN(pointcloud, bb, 1.5, 5, 2.5)
 
@@ -74,6 +74,11 @@ def updateBB(bbs, nSensor, i, nMethod):
                 newBB.append(box)
             for cluster in clusters:
                 newClusters.append(cluster)
+            if nMethod == 1:
+                expandedBoxes.append(expandedBox)
+
+    if nMethod == 1:
+        o3d.visualization.draw([pointcloud, *expandedBoxes], show_skybox = False)
     
     remainingPoints = findPointsOutsideBB(pointcloud, newClusters)
     discoveredBoxes = []
