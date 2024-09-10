@@ -1,34 +1,26 @@
 import numpy as np
 import open3d as o3d
 
-def expand_bounding_box(bounding_box, expansion_factor):
-    new_extents = bounding_box.extent * (1 + expansion_factor)
-    return o3d.geometry.OrientedBoundingBox(bounding_box.center, bounding_box.R, new_extents)
+def expandBoundingBox(boundingBox, expansionFactor):
+    newExtents = boundingBox.extent * (1 + expansionFactor)
+    return o3d.geometry.OrientedBoundingBox(boundingBox.center, boundingBox.R, newExtents)
 
 def pointsInBB(pointcloud, bounding_box):
 
-    # getting boints of point cloud
-    points = np.asarray(pointcloud.points)
+    # getting points of point cloud
+    indices = bounding_box.get_point_indices_within_bounding_box(pointcloud.points)
+    pointsInBox = np.asarray(pointcloud.points)[indices]
 
-    # getting the lower left and upper right corners of the bounding box
-    min_point = bounding_box.center - bounding_box.extent / 2
-    max_point = bounding_box.center + bounding_box.extent / 2
+    return pointsInBox
 
-    # getting indices of points within the bounding box (if there are any)
-    indices = [i for i, point in enumerate(points) if min_point[0] <= point[0] <= max_point[0] and min_point[1] <= point[1] <= max_point[1] and min_point[2] <= point[2] <= max_point[2]]
-
-    points_in_box = points[indices]
-    
-    return points_in_box
-
-def customDBSCAN(pointcloud, bounding_box, bb_expansion_factor, eps, minPts):
+def customDBSCAN(pointcloud, boundingBox, bbExpansionFactor, eps, minPts):
     
     # expanding the bounding box with a certain value in case the object is moving and it needs to be tracked
     # creating a new function because bounding_box is readonly
-    bounding_box = expand_bounding_box(bounding_box, bb_expansion_factor)
+    boundingBox = expandBoundingBox(boundingBox, bbExpansionFactor)
 
     # getting the points that are within the bounding box  
-    points = pointsInBB(pointcloud, bounding_box) 
+    points = pointsInBB(pointcloud, boundingBox) 
 
     if points.any(): # checking if there are any points in the bounding box
 
