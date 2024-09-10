@@ -3,28 +3,15 @@ import open3d as o3d
 
 def pointsInBB(pointcloud, bounding_box):
 
-    # getting boints of point cloud
-    points = np.asarray(pointcloud.points)
+    # getting points of point cloud
+    indices = bounding_box.get_point_indices_within_bounding_box(pointcloud.points)
+    pointsInBox = np.asarray(pointcloud.points)[indices]
 
-    # getting the lower left and upper right corners of the bounding box
-    min_point = bounding_box.center - bounding_box.extent / 2
-    max_point = bounding_box.center + bounding_box.extent / 2
-
-    # getting indices of points within the bounding box (if there are any)
-    indices = [i for i, point in enumerate(points) if min_point[0] <= point[0] <= max_point[0] and min_point[1] <= point[1] <= max_point[1] and min_point[2] <= point[2] <= max_point[2]]
-
-    # creating array of points within the bounding box
-    pointsInBox = points[indices]
-
-    #gettung the indices of the remaining points 
-    remainingIndices = np.setdiff1d(np.arange(len(points)), indices)
-    pointsOutBox = points[remainingIndices]
-    
-    return pointsInBox, pointsOutBox
+    return pointsInBox
 
 def customDBSCAN(pointcloud, bounding_box, eps, minPts, expanseFactor):
 
-    points, remainingPoints = pointsInBB(pointcloud, bounding_box) # getting the points that are within the bounding box
+    points = pointsInBB(pointcloud, bounding_box) # getting the points that are within the bounding box
 
     if points.any(): # checking if there are any points in the bounding box
 

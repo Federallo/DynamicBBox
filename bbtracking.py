@@ -67,7 +67,7 @@ def updateBB(bbs, nSensor, i, nMethod):
         if nMethod == 1:
             boxes, clusters = dbscan1.customDBSCAN(pointcloud, bb, 0.6, 1.5, 5)
         elif nMethod == 2:
-            boxes, clusters = dbscan2.customDBSCAN(pointcloud, bb, 1.5, 5, 2)
+            boxes, clusters = dbscan2.customDBSCAN(pointcloud, bb, 1.5, 5, 2.5)
 
         if boxes:
             for box in boxes:
