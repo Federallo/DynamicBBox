@@ -61,10 +61,6 @@ def expandCluster(points, labels, i, neighbours, nCluster, eps, minPts):
 # considering only the bigger cluster
 def createBoundingBoxes(labels, points, expandedBox):
 
-    # generating bounding box and cluster that
-    boundingBoxes = []
-    clusters = []
-
     # excluding noise 
     effectiveLabels = labels[labels != -1]
 
@@ -76,12 +72,10 @@ def createBoundingBoxes(labels, points, expandedBox):
         clusterPoints = o3d.geometry.PointCloud()
         clusterPoints.points = o3d.utility.Vector3dVector(points[labels == mostFrequentClusterLabel])
             
-        #returning clusters
-        clusters.append(clusterPoints)
-            
         # creating bounding boxes for each cluster
         boundingBox = clusterPoints.get_oriented_bounding_box()
         boundingBox.color = [1, 0, 0]
-        boundingBoxes.append(boundingBox)
 
-    return boundingBoxes, clusters, expandedBox
+        return boundingBox, clusterPoints, expandedBox
+    else:
+        return None, None, None

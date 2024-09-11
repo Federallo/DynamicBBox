@@ -82,8 +82,8 @@ def updateBB(bbs, nSensor, i, nMethod):
             boxes, clusters = result
         
         if boxes:
-            newBB.extend(boxes)
-            newClusters.extend(clusters)
+            newBB.append(boxes)
+            newClusters.append(clusters)
         
     if nMethod == 1:
         o3d.visualization.draw([pointcloud, *expandedBoxes], show_skybox = False)
