@@ -58,25 +58,33 @@ def updateBB(bbs, nSensor, i, nMethod):
     # displaying pointcloud of the next scan and the bounding boxes
     o3d.visualization.draw([pointcloud, *bbs], show_skybox = False)
 
+    # Mapping between nMethod and the corresponding DBSCAN method
+    dbscanMethod = { 1: (dbscan1.customDBSCAN, (0.6, 1.5, 5)), 2: (dbscan2.customDBSCAN, (1.5, 5, 2.5)) }
+
+    if nMethod not in dbscanMethod:
+        print("Invalid method")
+        return None, None
+
+    dbscanFunction, params = dbscanMethod[nMethod]
+
     # updating every single bounding box
     newBB = []
     newClusters = []
     expandedBoxes = []
     for bb in bbs:
         
+        result = dbscanFunction(pointcloud, bb, *params)
+
         if nMethod == 1:
-            boxes, clusters, expandedBox = dbscan1.customDBSCAN(pointcloud, bb, 0.6, 1.5, 5)
-        elif nMethod == 2:
-            boxes, clusters = dbscan2.customDBSCAN(pointcloud, bb, 1.5, 5, 2.5)
-
+            boxes, clusters, expandedBox = result
+            expandedBoxes.append(expandedBox)
+        else:
+            boxes, clusters = result
+        
         if boxes:
-            for box in boxes:
-                newBB.append(box)
-            for cluster in clusters:
-                newClusters.append(cluster)
-            if nMethod == 1:
-                expandedBoxes.append(expandedBox)
-
+            newBB.extend(boxes)
+            newClusters.extend(clusters)
+        
     if nMethod == 1:
         o3d.visualization.draw([pointcloud, *expandedBoxes], show_skybox = False)
     
