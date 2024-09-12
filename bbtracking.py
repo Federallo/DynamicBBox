@@ -92,6 +92,7 @@ def updateBB(bbs, nSensor, i, nMethod):
     discoveredBoxes = []
     
     #TODO adjust the number of points to consider
+    #FIXME clustering is not working properly. It connects points that are not close to each other
     if len(remainingPoints.points) > 20:
         discoveredBoxes = blensoranalysis.generateBB(remainingPoints)
         for discovederedBox in discoveredBoxes:

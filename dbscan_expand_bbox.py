@@ -3,7 +3,9 @@ import open3d as o3d
 
 def expandBoundingBox(boundingBox, expansionFactor):
     newExtents = boundingBox.extent * (1 + expansionFactor)
-    return o3d.geometry.OrientedBoundingBox(boundingBox.center, boundingBox.R, newExtents)
+    extendedBoundingBox = o3d.geometry.OrientedBoundingBox(boundingBox.center, boundingBox.R, newExtents)
+    extendedBoundingBox.color = [1, 0, 0]
+    return extendedBoundingBox
 
 def pointsInBB(pointcloud, bounding_box):
 
