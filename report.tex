@@ -10,8 +10,8 @@
 \section{Introduzione}
 Il seguente progetto consiste nell'aggiornare i bounding box generati inizialmente dall'algoritmo della repository blensor\_analysis.\\
 Per poter inizializzare il cluster all'interno della bounding box, è stato utilizzato un algoritmo di DBSCAN custom, il quale prende come argomenti la bounding box dello scan corrente e la point cloud dello scan successivo.\\
-Una volta determinati i punti interni alla bounding box, seleziona il cluster con più punti al suo interno, il quale rappresenta l'oggetto relativo alla bounding box, e ne crea un nuovo bounding box.\\
-In caso ci fossero dei punti esterni dai bounding box, questi vengono analizzati dall'algoritmo della repository blensor\_analysis e, in caso venissero indivduate nuovi bounding box, nuovi aggiunti alla lista di bounding box da aggiornare.\\
+Una volta determinati i punti interni alla bounding box, seleziona il cluster con più punti al suo interno, il quale rappresenta l'oggetto associato alla bounding box, e ne crea un nuovo bounding box.\\
+In caso ci fossero dei punti esterni dalle bounding box, questi vengono analizzati dall'algoritmo della repository blensor\_analysis e, in caso venissero indivduate nuove bounding box, vengono aggiunte alla lista di bounding box da aggiornare.\\
 \section{Descrizione dei file}
 Nella seguente sezione vengono trattate nel dettaglio i singoli file del progetto.
 \subsection{pointcloud}
@@ -27,7 +27,7 @@ Il file blensoranalysis presenta metodi che servono da tramite tra DynamicBBox e
 In customdbscan viene preso l'algoritmo di DBSCAN e viene adattato allo scopo del progetto.\\
 Sono stati implementati due modi diversi:
 \subsubsection{Espansione della bounding box}
-In questo caso le bounding box vengono prima espanse e successivamente vengono clusterizzati i punti al loro interno.
+Impelementato nel file dbscan\_expand\_bbox, le bounding box vengono prima espanse e successivamente vengono clusterizzati i punti al loro interno.
 I metodi implementati sono:
 \begin{itemize}
 	\item customDBSCAN: il metodo customDBSCAN prende come argomenti le point clouds dello scan successivo, la bounding box, il fattore di espansione delle bounding boxes, eps (distanza massima tra due punti per essere considerati nello stesso cluster) e minPts (numero minimo di punti per formare un cluster).\\ Inizialmente individua i punti interno alla bounding box. Successivamente li clusterizza assegnandogli un label.
@@ -37,11 +37,11 @@ I metodi implementati sono:
 	\item createBoundingBoxes: è la funzione che crea la bounding box dati i labels dei punti interni alla bounding box. Essenzialmente rimuove tutti quei label che individuano cluster più piccoli e crea la bounding box relativa al cluster più grande.
 \end{itemize}
 \subsubsection{Clusterizzazione dei punti vicini alla bounding box}
-Rispetto al metodo precedente, non viene espansa la bounding box e nei metodi customDBSCAN e expandCluster vengono considerati anche i punti esterni alla bounding box. Quelli che sono vicini vengono aggiunti all lista dei points e dei labels.
+Implementato in dbscan\_near\_search, rispetto al metodo precedente non viene espansa la bounding box, ma nei metodi customDBSCAN e expandCluster vengono considerati anche i punti esterni alla bounding box. Quelli che sono vicini vengono aggiunti all lista dei points e dei labels.
 \subsection{bbtracking}
 Il seguente file presenta i seguenti metodi:
 \begin{itemize}
-	\item updateBB: il metodo updateBB aggiorna le buonding boxes date in input considerando le point clouds dello scan successivo usando customDBSCAN. Successivamente vengono analizzate le eventuali restanti point clouds che no		n erano presenti all'interno delle bounding boxes e ne vengono create nuove tramite. Se delle bounding box si sovrappongono, vengono rimosse quelle più piccole.
+	\item updateBB: il metodo updateBB aggiorna le buonding boxes date in input considerando le point clouds dello scan successivo usando customDBSCAN. Prima che venga invocato quest'ultimo, viene mostrato tramite open3d la situazione di partenza. Una volta aggiornate le bounding boxes, vengono analizzate le eventuali restanti point clouds che non erano presenti all'interno di queste ultime e ne vengono create nuove. Se delle bounding box si sovrappongono, vengono rimosse quelle più piccole. Se viene utilizzato il primo metodo di espansione delle bonding boxes, vengono prima mostrate le bounding boxes espanse e successivamente quelle aggiornate. Nel caso, invece, della clusterizzazione dei punti vicini, venogno mostrate le bounding box finali con i nouvi punti aggiunti di colore verde.
 	\item findPointsOutsideBB: rappresenta la funzione che trova i punti esterni alle bounding boxes.
 	\item removeOverlappingBoxes: rimuove le bounding boxes che si sovrappongono.
 	\item displayBoundingBoxes: mostra le bounding boxes e le point clouds tramite open3d.
