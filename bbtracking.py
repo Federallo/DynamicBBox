@@ -55,6 +55,9 @@ def updateBB(bbs, nSensor, i, nMethod):
     # loading the next scan
     pointcloud = pc.generatePointClouds(nSensor, i+1)
 
+    # saving pointcloud for display
+    oldPointcloud = pointcloud
+
     # displaying pointcloud of the next scan and the bounding boxes
     o3d.visualization.draw([pointcloud, *bbs], show_skybox = False)
 
@@ -88,24 +91,33 @@ def updateBB(bbs, nSensor, i, nMethod):
     if nMethod == 1:
         o3d.visualization.draw([pointcloud, *expandedBoxes], show_skybox = False)
     
-    '''
+
     remainingPoints = findPointsOutsideBB(pointcloud, newClusters)
     discoveredBoxes = []
     
     #TODO adjust the number of points to consider
     #FIXME clustering is not working properly. It connects points that are not close to each other
     
-    if len(remainingPoints.points) > 20:
-        discoveredBoxes = blensoranalysis.generateBB(remainingPoints)
+    if len(remainingPoints.points) > 4:
+
+        labels = np.array(remainingPoints.cluster_dbscan(eps = 2.5, min_points = 5, print_progress = False))
+        clusters = []
+        for label in np.unique(labels):
+            cluster_mask = labels == label
+            clusters.append(remainingPoints.select_by_index(np.where(cluster_mask)[0]))
+        for cluster in clusters:
+            if len(cluster.points) > 4:
+                bb = cluster.get_oriented_bounding_box()
+                bb.color = [0, 1, 0]
+                discoveredBoxes.append(bb)
+
         for discovederedBox in discoveredBoxes:
             print("discovered boxes", discoveredBoxes)
             newBB.append(discovederedBox)
 
     removeOverlappingBoxes(newBB)
-    '''
-    
 
-    return newBB, pointcloud
+    return newBB, oldPointcloud
 
 def displayBoundingBoxes(bbs, pointcloud): # to display only the clustered points "pointcloud" must be changed in "*pointcloud"
     o3d.visualization.draw([pointcloud, *bbs], show_skybox=False) 
