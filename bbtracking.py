@@ -59,7 +59,7 @@ def updateBB(bbs, nSensor, i, nMethod):
     o3d.visualization.draw([pointcloud, *bbs], show_skybox = False)
 
     # Mapping between nMethod and the corresponding DBSCAN method
-    dbscanMethod = { 1: (dbscan1.customDBSCAN, (0.6, 1.5, 5)), 2: (dbscan2.customDBSCAN, (1.5, 5, 2.5)) }
+    dbscanMethod = { 1: (dbscan1.customDBSCAN, (0.6, 1.5, 6)), 2: (dbscan2.customDBSCAN, (1.5, 5, 2.5)) }
 
     if nMethod not in dbscanMethod:
         print("Invalid method")
@@ -88,11 +88,13 @@ def updateBB(bbs, nSensor, i, nMethod):
     if nMethod == 1:
         o3d.visualization.draw([pointcloud, *expandedBoxes], show_skybox = False)
     
+    '''
     remainingPoints = findPointsOutsideBB(pointcloud, newClusters)
     discoveredBoxes = []
     
     #TODO adjust the number of points to consider
     #FIXME clustering is not working properly. It connects points that are not close to each other
+    
     if len(remainingPoints.points) > 20:
         discoveredBoxes = blensoranalysis.generateBB(remainingPoints)
         for discovederedBox in discoveredBoxes:
@@ -100,6 +102,7 @@ def updateBB(bbs, nSensor, i, nMethod):
             newBB.append(discovederedBox)
 
     removeOverlappingBoxes(newBB)
+    '''
     
 
     return newBB, pointcloud
