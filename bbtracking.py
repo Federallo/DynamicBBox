@@ -104,5 +104,5 @@ def updateBB(bbs, nSensor, i, nMethod):
 
     return newBB, pointcloud
 
-def displayBoundingBoxes(bbs, pointcloud):
+def displayBoundingBoxes(bbs, pointcloud): # to display only the clustered points "pointcloud" must be changed in "*pointcloud"
     o3d.visualization.draw([pointcloud, *bbs], show_skybox=False) 

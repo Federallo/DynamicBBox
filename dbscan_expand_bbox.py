@@ -7,53 +7,64 @@ def expandBoundingBox(boundingBox, expansionFactor):
     extendedBoundingBox.color = [1, 0, 0]
     return extendedBoundingBox
 
-def pointsInBB(pointcloud, bounding_box):
+def pointsInBB(pointcloud, boundingBox):
 
     # getting points of point cloud
-    indices = bounding_box.get_point_indices_within_bounding_box(pointcloud.points)
+    indices = boundingBox.get_point_indices_within_bounding_box(pointcloud.points)
     pointsInBox = np.asarray(pointcloud.points)[indices]
 
-    return pointsInBox
+    return pointsInBox, indices
 
-def customDBSCAN(pointcloud, boundingBox, bbExpansionFactor, eps, minPts):
-    
+def generatePointAndLabels(pointcloud, boundingBox, bbExpanseFactor):
+
+    # getting the indices of the points within the bounding box
+    corePoints = boundingBox.get_point_indices_within_bounding_box(pointcloud.points)
+
     # expanding the bounding box with a certain value in case the object is moving and it needs to be tracked
     # creating a new function because bounding_box is readonly
-    boundingBox = expandBoundingBox(boundingBox, bbExpansionFactor)
+    boundingBox = expandBoundingBox(boundingBox, bbExpanseFactor)
 
     # getting the points that are within the bounding box  
-    points = pointsInBB(pointcloud, boundingBox) 
+    points, indices = pointsInBB(pointcloud, boundingBox) 
+
+    # initializing the labels of the points
+    labels = np.zeros(len(points))
+
+    for i, indexValue in enumerate(indices):
+        if indexValue in corePoints:
+            labels[i] = -2 # setting custom label for core points within the first bounding box
+        else:
+            labels[i] = -1
+    return points, labels, boundingBox
+
+
+def customDBSCAN(pointcloud, boundingBox, bbExpansionFactor, eps, minPts):
+
+    points, labels, boundingBox = generatePointAndLabels(pointcloud, boundingBox, bbExpansionFactor)
 
     if points.any(): # checking if there are any points in the bounding box
 
-        labels = np.zeros(len(points)) -1 # initializing all points as noise (-1)
         nCluster = 0 # initializing the cluster label to assign to the points (so for example the first cluster will have label 0, the second 1, and so on. Each of them will have a group of points)
 
         for i in range(len(points)):
-            if labels[i] == -1:
+            if labels[i] == -2:
                 
                 neighbours = [j for j, point in enumerate(points) if np.linalg.norm(point - points[i]) < eps] # getting the neighbours of points[i] that are within eps distance
 
-                if len(neighbours) < minPts:
-                    labels[i] = -1 # labeling point as noise because it doesn't have enough neighbours
-                else:
-                    nCluster += 1
-                    labels = expandCluster(points, labels, i, neighbours, nCluster, eps, minPts)
+                if len(neighbours) > minPts:#<
+                    labels = expandCluster(points, labels, neighbours, nCluster, eps, minPts)
 
         #returning new bounding box (/bounding boxes in case with the newly discovered clusters)
         return createBoundingBoxes(labels, points, boundingBox)
     else:
         return None, None, None
 
-def expandCluster(points, labels, i, neighbours, nCluster, eps, minPts):
-
-    # assing the current point to a cluster
-    labels[i] = nCluster
+def expandCluster(points, labels, neighbours, nCluster, eps, minPts):
 
     for j in neighbours:
         #checking if the current point is labeled as noise
         if labels[j] == -1:
-            labels[j] = nCluster
+            labels[j] = -2 #nCluster
             #seraching for new neighbours to add to "neighbours" variable
             newNeighbours = [k for k, point in enumerate(points) if np.linalg.norm(point - points[j]) < eps]
             if len(newNeighbours) >= minPts:
@@ -72,7 +83,7 @@ def createBoundingBoxes(labels, points, expandedBox):
         mostFrequentClusterLabel = uniqueClusterLabels[np.argmax(countClusterLabels)] # getting the most frequent cluster label
 
         clusterPoints = o3d.geometry.PointCloud()
-        clusterPoints.points = o3d.utility.Vector3dVector(points[labels == mostFrequentClusterLabel])
+        clusterPoints.points = o3d.utility.Vector3dVector(points[labels == -2])
             
         # creating bounding boxes for each cluster
         boundingBox = clusterPoints.get_oriented_bounding_box()
