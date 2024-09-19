@@ -21,7 +21,6 @@ def generatePointsAndLabels(pointcloud, boundingBox, expanseFactor):
     # creating the mesh for the sphere centered at the obb center
     sphereMesh = o3d.geometry.TriangleMesh.create_sphere(radius=sphereRadius)
     sphereMesh.translate(bbCenter)
-    sphereMesh.compute_vertex_normals()
     wireFrame = o3d.geometry.LineSet.create_from_triangle_mesh(sphereMesh)
     wireFrame.paint_uniform_color([1, 0, 0])
 
