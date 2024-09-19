@@ -9,6 +9,7 @@
 \begin{document}
 \section*{Introduzione}
 %Inserire introduzione
+
 \section*{Tecnlogie utilizzate}
 Nella seguente sezione saranno elencate le tecnologie utilizzate per lo sviluppo del progetto. Alcune di esse, essendo state utilizzate principalmente dal mio collega, Marco Bardazzi, verranno passate in rassegna più rapidamente.\\
 Ciascuna di esse, comunque, è stata implementata in Python.
@@ -31,7 +32,7 @@ Per lo sviluppo del progetto è stata sfruttata per la clusterizzazione delle po
 \subsubsection{Pointcloud}
 La pointcloud è una struttura dati che rappresenta un insieme di punti nello spazio 3D. Viene istanziata tramite \textit{geometry.PointCloud()} e i punti di coordinate (x,y,z) vengono aggiunti come \textit{utlityVector3dVector(list)}\\
 \subsubsection*{Sottocampionamento}
-Essendo il campionamento delle pointcloud tramite scansioni LiDAR molto elevato, è stato necessario sottocampionare le pointcloud per ridurre il numero di punti e velocizzare l'elaborazione. Attraverso \textit{pointcloud.voxeldownsample(size)}  viene sottocampionata la pointcloud a partire da cubi di lato \textit{size}. Questi ultimi dividono lo spazio 3D in griglie e per ciascuna griglia viene mantenuto un solo punto.
+Essendo il campionamento delle pointcloud tramite scansioni LiDAR molto elevato, è stato necessario sottocampionare le pointcloud per ridurre il numero di punti e velocizzare l'elaborazione. Attraverso \textit{pointcloud.voxeldownsample(size)}  viene sottocampionata la pointcloud a partire da cubi di lato \textit{size}. Questi ultimi dividono lo spazio 3D in griglie e per ciascun cubo, se presenta una serie di punti, ne viene mantenuto uno solo.
 \subsubsection*{Clustering}
 Open3D dispone di un algoritmo di clustering, \textit{pointcloud.cluster\_dbscan(eps, min\_points, print\_progress)}, che permette di clusterizzare i punti della pointcloud.\\
 E' un metodo di raggruppamento di punti a una distanza e con un numero di punti minimo prestabiliti.\\
@@ -63,12 +64,83 @@ Uno dei due metodi di clusterizzazione implementati è basato sulla creazione di
 Il metodo \textit{open3d.geometry.TriangleMesh.create\_sphere(radius)} crea una sfera di raggio \textit{radius} centrata nel centroide della bounding box attraverso il metodo \textit{translate(translation)}.\\
 Essendo, a questo punto, una sfera che impedisce la visualizzazione dei punti interni, è stato necessario trasformarla in un wireframe. Istanziando un oggetto \textit{open3d.geometry.LineSet.create\_from\_triangle\_mesh(mesh)}, quest'ultima estrae dalla mesh della sfera i lati dei triangoli che la compongono, per permettere la visualizzazione dei punti interni.\\
 \subsubsection{Draw}
-Open3D offre la possibilità di visualizzare 
+Open3D offre la possibilità di visualizzare tramite interfaccia le pointcloud e le bounding box attraverso il metodo \textit{open3d.visualization.draw()}. E' possibile navigare liberamente all'interno della finestra, zoommando e ruotando gli oggetti.\\
+Sono presenti, inoltre, parametri i quali permetto una visualizzazione più personalizzata come
+\begin{itemize}
+	\item mostrare o nascondere piani arbitrari oppure
+	\item mostrare o nascondere gli assi di riferimento
+\end{itemize}
+Nel progetto è stata sfruttata soprattutto per avere una visualizzazione grafica che mostra ogni passaggio che effettua il programma.
 
-Il seguente progetto consiste nell'aggiornare i bounding box generati inizialmente dall'algoritmo della repository blensor\_analysis.\\
-Per poter inizializzare il cluster all'interno della bounding box, è stato utilizzato un algoritmo di DBSCAN custom, il quale prende come argomenti la bounding box dello scan corrente e la point cloud dello scan successivo.\\
-Una volta determinati i punti interni alla bounding box, seleziona il cluster con più punti al suo interno, il quale rappresenta l'oggetto associato alla bounding box, e ne crea un nuovo bounding box.\\
-In caso ci fossero dei punti esterni dalle bounding box, questi vengono analizzati dall'algoritmo della repository blensor\_analysis e, in caso venissero indivduate nuove bounding box, vengono aggiunte alla lista di bounding box da aggiornare.\\
+\section*{Alogirtmi}
+Nella seguente sezione verranno trattati gli algoritmi implementati per il progetto.
+\subsection{Clustering}
+Il clustering è un metodo di Unsupervised Learning che raggruppa un insieme di oggetti in classi simili. Tali classi possono essere definite in base alla forma, al colore o alla densità degli oggetti.\\
+E' usato principalmente per l'esplorazione dei dati, per ridurne la complessità di ricerca oppure per raggrupparli in maniera efficiente oppure per comprimerli.\\
+L'algoritmo usato nel seguente progetto che implementa il clustering è il DBSCAN.
+\subsubsection{DBSCAN}
+L'algoritmo DBSCAN divide i punti della pointcloud in batch o gruppi in base, in questo caso, alla densità.\\
+Prima di descrivere l'argoritmo in dettaglio, è necessario definire le seguenti terminologie:
+\begin{itemize}
+	\item Core point: un punto è un core point se ha almeno un numero minimo di punti vicini, definiti \textit{minPts}, entro una certa distanza, chiamata \textit{epsilon} o \textit{eps}.
+	\item Border point: un punto è un border point se non è un core point, ma è raggiungibile da un core point.
+	\item Noise point: un punto è un noise point se non è nè un core point nè un border point.
+\end{itemize}
+I passi principali dell'algoritmo sono:
+\begin{itemize}
+	\item individua i core points.
+	\item per ogni core point che non è stato assegnato a un cluster, ne crea uno nuovo, aggiungendo tutti i punti raggiungibili.
+	\item cerca ricorsivamente i punti \textit{density-connected} e li aggiunge allo stesso cluster come core points. Per \textit{density-connected} si intende che due punti sono collegati se esiste un core point che li collega.		Quindi se un punto \textit{b} è raggiungibile da un punto \textit{a}, e un punto \textit{c} è raggiungibile da \textit{b}, allora \textit{c} è raggiungibile da \textit{a}.
+	\item itera fino a quando tutti i punti sono assegnati a un cluster. Quelli che non appartengono a nessun cluster sono considerati noise points.
+\end{itemize}
+Rappresenta un algoritmo molto resistente a noise e può individuare cluster di forma arbitraria. La complessità dell'algoritmo è quadratica ($O(n^2)$)\\
+Come accennato in precedenza, nel caso del progetto viene utilizzato per clusterizzare le pointcloud all'avvio del programma e ogni volta che ci sono nuove pointcloud da analizzare e non hanno una bounding box.
+\subsubsection{DBSCAN personalizzato}
+Per il progetto è stato necessario implementare un algoritmo di DBSCAN personalizzato, in quanto quello di Open3D non soddisfaceva i requisiti ed era necessario che prendesse in considerazione dei punti già clusterizzati come situazione di partenza e che completasse la creazione di un solo cluster per volta.\\
+Quindi, partendo da delle bounding box già inizializzate (che vengono colorate di verde) e dalla pointcloud dello scan successivo, l'algoritmo compie i seguenti passaggi:
+\begin{itemize}
+	\item data la bounding box, individua gli indici dei punti interni sfruttando la funzione \textit{get\_point\_indices\_within\_bounding\_box()} che chiameremo \textbf{punti core}.
+	\item a seconda del metodo di clusterizzazione scelto si espande/ si trasforma la bounding box in due modi differenti.
+		\begin{itemize}
+			\item dbscan\_expand\_bbox: espande la bounding box e riutilizza la stessa funzione per ottenere gli indici dei nuovi punti.
+			\item dbscan\_sphere\_bound: genera una sfera con centro nel centroide della bounding box e di raggio pari alla dimensione maggiore della bounding box per un fattore di espansione dato in input, diviso due 					per indicare il raggio. Successiva individua gli indici dei punti interni alla sfera.
+		\end{itemize}
+	\item una volta individuati questi due set di indici, istanzia un array di label delle stesse dimensioni del numero di indici dei punti generati da \textit{dbscan\_expand\_bbox} o \textit{dbscan\_sphere\_bound} e si settano a -1, cioè come noise. Successivamente setta a 1 tutti quegli indici che sono presenti nei \textbf{punti core}.
+	\item a questo punto viene applicato l'effettivo algoritmo dbscan, con la differenza che parte dai punti che hanno label 1 (e che quindi sono già considerati appartenenti a un cluster), cerca ricorsivamente i punti vicini e clusterizza quelli che hanno label -1.
+	\item la lista di label viene sfruttata per creare un cluster, dal quale si genera la bounding box aggiornata che sarà colorata di rosso.
+\end{itemize}
+Questo approccio risulta molto più rapido ed efficace rispetto all'algoritmo implementato da open3d in quanto analizza solo singole porzioni di pointcloud per volta, cioè quelle presenti all'interno delle bounding box, parte da dei cluster già avviati e aggiunge solo i punti che sono vicini a questi ultimi, campionati in un determinato range stabilito dalla sfera o dalla bounding box espansa.\\
+Ovviamente, se il numero minimo di punti per formare un cluster è troppo basso, l'oggetto non viene più seguito e non viene generata la bounding box aggiornata.
+\subsection{Intersezione di bounding box}
+Avendo la possibilità di poter clusterizzare pointcloud esterne alle bounding box, può capitare che in uno scan precedente si abbia una bounding box che contiene parte di un oggetto (in quanto il veicolo sta entrando nel range dei sensori) e che nello scan successivo si abbia una nuova bounding box che contiene la parte restante, o l'oggetto completo, ma che comunque si sovrappone alla precedente.\\
+Perciò è stato necessario implementare un algoritmo che confronta le bounding box a coppie. Partendo dagli 8 vertici di ogni bounding box, si controlla se uno dei vertici di una è contenuto all'interno dell'altra. Questa operazione è possibile verificando la sovrapposizione(ovrelap) minima e massima di ciascun asse.\\
+Dati come assi di riferimento i tre assi cartesiani:
+\begin{itemize}
+	\item l'overlap minimo viene calcolato tramite valore massimo di ciascuna delle coordinate interessate delle due bounding box prese in analisi che ha valore minimo.
+	\item l'overlap massimo viene calcolato tramite valore minimo di ciascuna delle coordinate interessate delle due bounding box prese in analisi che ha valore massimo.
+\end{itemize}
+Se gli overlap massimi di ciascun asse sono maggiori degli overlap minimi, allora siginfica che le bounding box si sovrappongono e quindi viene rimossa quella che ha volume minore. Questo valore è ottenuto dalla funzione \textit{get\_volume()} che calcola il volume della bounding box come prodotto delle lunghezze dei tre lati.\\
+
+\section*{Progetto}
+Il seguente progetto consiste nell'aggiornare i bounding box generati inizialmente dall'algoritmo della repository blensor\_analysis per una maggiore velocità di esecuzione. A seconda delle necessità, la clusterizzazione delle pointcloud in istanti successivi viene effettuata o all'interno di una bounding box espansa oppure all'interno di una sfera.\\
+I principali parametri che ne determineranno le prestazioni sono i tempi di esecuzione e la precisione delle bounding box.\\ %TODO la precisione delle bounding box va fatta solo tra i due metodi, mentre i tempi di esecuzione vanno confrontati anche con l'algoritmo blensor analysis
+Il programma è strutturato nella seguente maniera:
+\begin{itemize}
+	\item importazione della prima scansione, generazione delle pointcloud e creazione delle prime bounding box
+	\item aggiornamento delle bounding box a ogni scansione successiva
+	\item visualizzazione grafica di ogni passaggio
+	%TODO mettere grafici a confronto dei tempi di esecuzione
+\end{itemize}
+\subsection{Hardware e librerie utilizzati}
+Le principali librerie e il package utilizzato per lo sviluppo dell'applicativo python sono:
+\begin{itemize}
+	\item blensor\_analysis: per la generazione delle prime bounding box e per la creazione delle pointcloud utili agli istanti successivi
+	\item open3D
+	\item numpy: per la gestione di array
+\end{itemize}
+Invece come hardware è stato utilizzato un computer con processore i5-10600k, 16GB di RAM e scheda video NVIDIA GeForce RTX 3070. Come IDE è stato utilizzato neovim.
+
+
 \section{Descrizione dei file}
 Nella seguente sezione vengono trattate nel dettaglio i singoli file del progetto.
 \subsection{pointcloud}
