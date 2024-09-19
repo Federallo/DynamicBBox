@@ -15,7 +15,7 @@ def pointsInBB(pointcloud, boundingBox):
 
     return pointsInBox, indices
 
-def generatePointAndLabels(pointcloud, boundingBox, bbExpanseFactor):
+def generatePointsAndLabels(pointcloud, boundingBox, bbExpanseFactor):
 
     # getting the indices of the points within the bounding box
     corePoints = boundingBox.get_point_indices_within_bounding_box(pointcloud.points)
@@ -40,7 +40,7 @@ def generatePointAndLabels(pointcloud, boundingBox, bbExpanseFactor):
 
 def customDBSCAN(pointcloud, boundingBox, bbExpansionFactor, eps, minPts):
 
-    points, labels, boundingBox = generatePointAndLabels(pointcloud, boundingBox, bbExpansionFactor)
+    points, labels, boundingBox = generatePointsAndLabels(pointcloud, boundingBox, bbExpansionFactor)
 
     if points.any(): # checking if there are any points in the bounding box
 
