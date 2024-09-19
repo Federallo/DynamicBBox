@@ -50,7 +50,20 @@ Inoltre, Open3D permette di assegnare un colore alle bounding box, utilizzando i
 \subsubsection*{Punti interni alla bounding box}
 Lo scopo del progetto è quello di aggiornare le bounding box nel modo più rapido possibile. La funzione \textit{OrientedBoundingBox.get\_point\_indices\_within\_bounding\_box(pointcloud.points)} è cruciale per individuare i core points della pointcloud, da cui poi crearne il nuovo cluster e aggiornare la bounding box. Essenzialmente, analizza ogni singolo punto dato come argomento (in questo caso pointcloud.points) e ritorna un array di booleani, dove il valore true indica che il punto è interno alla bounding box. Un punto viene considerato tale se, proiettando il singolo punto sui tre assi, risulta compreso tra i valori minimi e massimi di ciascun asse, i quali sono definiti dall'attributo \textit{extent} della OBB.
 Questo metodo è ottimizzato per pointcloud di grandi dimensioni e garantisce un'ottima accuratezza nell'individuare i punti.
-
+\subsubsection*{Centro, estensione e orientazione della bounding box}
+L'oggetto \textit{geometry.OrientedBoundingBox} dispone di tre attributi fondamentali:
+\begin{itemize}
+	\item center: rappresenta il centro della bounding box.
+	\item extent: rappresenta l'estensione della bounding box.
+	\item R: rappresenta la matrice di rotazione della bounding box.
+\end{itemize}
+Nell'esperimento, i seguenti dati hanno permesso di espandere la bounding box e, quindi, includere nuovi punti della pointcloud.
+\subsubsection{Sfera}
+Uno dei due metodi di clusterizzazione implementati è basato sulla creazione di sfera di bounding box. Open3D permette di istanziare un oggetto \textit{open3d.geometry.TriangleMesh}, che crea e manipola geometrie 3D a mesh triangolari. Una mesh triangolare è un tipo di mesh poligonale in cui la superficie di un oggetto 3D è composta da facce triangolari.\\
+Il metodo \textit{open3d.geometry.TriangleMesh.create\_sphere(radius)} crea una sfera di raggio \textit{radius} centrata nel centroide della bounding box attraverso il metodo \textit{translate(translation)}.\\
+Essendo, a questo punto, una sfera che impedisce la visualizzazione dei punti interni, è stato necessario trasformarla in un wireframe. Istanziando un oggetto \textit{open3d.geometry.LineSet.create\_from\_triangle\_mesh(mesh)}, quest'ultima estrae dalla mesh della sfera i lati dei triangoli che la compongono, per permettere la visualizzazione dei punti interni.\\
+\subsubsection{Draw}
+Open3D offre la possibilità di visualizzare 
 
 Il seguente progetto consiste nell'aggiornare i bounding box generati inizialmente dall'algoritmo della repository blensor\_analysis.\\
 Per poter inizializzare il cluster all'interno della bounding box, è stato utilizzato un algoritmo di DBSCAN custom, il quale prende come argomenti la bounding box dello scan corrente e la point cloud dello scan successivo.\\
