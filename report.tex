@@ -17,6 +17,17 @@ LiDAR, o Light Detection and Ranging, rappresenta uno strumeto di telerilevament
 Il risultato di tale processo è una pointcloud.
 \subsection{Datasets}
 Affinché si avesse una generazione affidabile delle pointcloud a partire dai dataset, è stato necessario l'utilizzo di \textit{Arogverse} per l'acquisizione di scenari e modelli, e \textit{Blensor} per simulare scansioni LiDAR.\\
+\subsubsection{Argoverse}
+Argoverse è un dataset open-source, sviluppato dall'Università Carnegie Mellon e dal Georgia Institute of Tecnology negli Stati Uniti. Le mappe disponibili includono metadati, utili per lo sviluppo di sistemi a guida autonoma.\\
+I dati sono stati raccolti in Miami e Pittsburgh, due città caratterizzate da due comportamenti di guida differenti. Nel progetto è stato analizzata la mappa di un incrocio di Pittsburgh, incluso uno storico dei veicoli passanti (specificando per ciascuno ID, posizioni e velocità).\\
+Nonostante tali dati siano stati raccolti attraverso veicoli con telecamere e sensori LiDAR, questi ultimi non influenzano assolutamente il progetto.
+\subsubsection{BlenSor}
+BlenSor è un package dell'applicazione Blender che permette di simulare scansioni LiDAR. Sviluppata dall'Università di Salisburgo, ha come principale vantaggio quello di creare scenari che, nel caso della guida autonoma, nella realtà non sarebbero possibili o sarebbe troppo costoso riprodurli (come per esempio una sitazione di incidente).\\
+Nel nostro caso è risultato cruciale sfruttare algoritmi di norma presenti in sensori, senza possederli fisicamente.\\
+La simulazione tramite Blensor genera un file .csv per ogni istante simultato e contenente le coordinate dei punti della pointcloud (senza rumore e filtrati).%TODO aggiungere nota: per filtrati si intende che non sono presenti i punti che rappresentano il terreno.
+\subsection{Open3D}
+Open3D è una libreria open-source che dispone di funzionalità grafiche per programmi Python e C++. Le principali features sono la possibilità di creare strutture dati 3D, la presenza di algoritmi di data processing in 3D utilizzabili e l'accelerazione hardware per operazioni 3D più laboriose.\\
+Per lo sviluppo del progetto è stata sfruttata per la clusterizzazione delle pointcloud e per la visualizzazione grafica.
 
 
 Il seguente progetto consiste nell'aggiornare i bounding box generati inizialmente dall'algoritmo della repository blensor\_analysis.\\
