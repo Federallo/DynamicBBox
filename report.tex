@@ -127,8 +127,7 @@ I principali parametri che ne determineranno le prestazioni sono i tempi di esec
 Il programma è strutturato nella seguente maniera:
 \begin{itemize}
 	\item importazione della prima scansione, generazione delle pointcloud e creazione delle prime bounding box
-	\item aggiornamento delle bounding box a ogni scansione successiva
-	\item visualizzazione grafica di ogni passaggio
+	\item aggiornamento delle bounding box a ogni scansione successiva e visualizzazione grafica di ogni passaggio
 	%TODO mettere grafici a confronto dei tempi di esecuzione
 \end{itemize}
 \subsection{Hardware e librerie utilizzati}
@@ -139,7 +138,24 @@ Le principali librerie e il package utilizzato per lo sviluppo dell'applicativo 
 	\item numpy: per la gestione di array
 \end{itemize}
 Invece come hardware è stato utilizzato un computer con processore i5-10600k, 16GB di RAM e scheda video NVIDIA GeForce RTX 3070. Come IDE è stato utilizzato neovim.
+\subsection{Note sul progetto}
+Come detto in precedenza, si sta analizzando un incrocio di Pittsburgh, nel quale sono stati posizionati 5 sensori ad altezza 2.5 metri da terra. La frequenza di scansione, in base alla velocità media dei veicoli, è di 10Hz.\\
+\subsection{importazione della prima scansione, generazione delle pointcloud e creazione delle prime bounding box}
+In questa fase iniziale del progetto viene sfruttata la libreia \textit{blensoranalysis} che invoca i principali metodi della repository \textit{blensor\_analysis} per importare la pointcloud iniziale dal file \textit{.csv}, generarne i cluster e le bounding box, e visualizzare questi ultimi tramite output visivo.\\
+In questo caso è stato scelto che le pointcloud venissero preventivamente filtrate, rimuovendo gli scan del terreno, e senza rumore, in quanto non fanno parte dello scopo del progetto.\\
+\subsection{aggiornamento delle bounding box a ogni scansione successiva}
+A questo punto, vengono coinvolte le librerie \textit{bbtracking.py}, \textit{dbscan\_expand\_bbox.py} (o \textit{dbscan\_sphere\_bound.py}) e \textit{blensoranalysis} per l'aggiornamento delle bounding box.\\
+In \textit{bbtracking.py} vengono aggiornate iterativamente le bounding box iniziali considerando le pointcloud degli scan successivi, ottentute tramite libreria\textit{blensoranalysis}. Se durante il procedimento di aggiornamento delle bounding box una di esse contiene una pointcloud che non è abbastanza grande, allora viene eleminata e la pointcloud viene vista come noise.\\
+Se durante l'aggiornamento delle bounding box in un determinato istante si presenta una nuova pointcloud che non è munita di bounding box, allora viene applicato il clustering di open3d e viene generata una nuova bounding box. Se quest'ultima si sovrappone a una bounding box già presente, allora viene rimossa quella con volume minore.\\
+Per quanto riguarda la visualizzazione grafica, vengono mostrate le seguenti situazioni:
+\begin{itemiz}
+	\item quando si hanno le bounding box dell'iterazione corrente le bounding box dello scan succesivo.
+	\item quando si effettua l'operazione di espasione delle bounding box generando una buonding box ingrandita oppure una sfera.
+	\item quando ogni pointcloud è stata correttamente clusterizzata e la bounding box è stata aggiornata corettamente.
+\end{itemize}
 
+\section*{conclusioni}
+Essendo in una situazione ideale 
 
 \section{Descrizione dei file}
 Nella seguente sezione vengono trattate nel dettaglio i singoli file del progetto.
