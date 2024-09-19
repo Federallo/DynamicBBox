@@ -28,13 +28,12 @@ def generatePointsAndLabels(pointcloud, boundingBox, bbExpanseFactor):
     points, indices = pointsInBB(pointcloud, boundingBox) 
 
     # initializing the labels of the points
-    labels = np.zeros(len(points))
+    labels = np.zeros(len(points)) -1
 
     for i, indexValue in enumerate(indices):
         if indexValue in corePoints:
             labels[i] = 1 # setting custom label for core points within the first bounding box
-        else:
-            labels[i] = -1
+
     return points, labels, boundingBox
 
 

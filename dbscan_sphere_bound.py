@@ -24,13 +24,11 @@ def generatePointsAndLabels(pointcloud, boundingBox, expanseFactor):
     wireFrame = o3d.geometry.LineSet.create_from_triangle_mesh(sphereMesh)
     wireFrame.paint_uniform_color([1, 0, 0])
 
-    labels = np.zeros(len(indices))
+    labels = np.zeros(len(indices)) -1
 
     for i, indexValue in enumerate(indices):
         if indexValue in corePoints:
             labels[i] = 1
-        else:
-            labels[i] = -1
 
     return np.asarray(pointcloud.points)[indices], labels, wireFrame
 
