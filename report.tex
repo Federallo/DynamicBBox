@@ -7,7 +7,18 @@
 \usepackage{babel}
 
 \begin{document}
-\section{Introduzione}
+\section*{Introduzione}
+%Inserire introduzione
+\section*{Tecnlogie utilizzate}
+Nella seguente sezione saranno elencate le tecnologie utilizzate per lo sviluppo del progetto. Alcune di esse, essendo state utilizzate principalmente dal mio collega, Marco Bardazzi, verranno passate in rassegna più rapidamente.\\
+Ciascuna di esse, comunque, è stata implementata in Python.
+\subsection{LiDAR}
+LiDAR, o Light Detection and Ranging, rappresenta uno strumeto di telerilevamento che determina la distanza di un oggetto o superfice, utilizzando impulsi laser che li vanno a colpire.\\
+Il risultato di tale processo è una pointcloud.
+\subsection{Datasets}
+Affinché si avesse una generazione affidabile delle pointcloud a partire dai dataset, è stato necessario l'utilizzo di \textit{Arogverse} per l'acquisizione di scenari e modelli, e \textit{Blensor} per simulare scansioni LiDAR.\\
+
+
 Il seguente progetto consiste nell'aggiornare i bounding box generati inizialmente dall'algoritmo della repository blensor\_analysis.\\
 Per poter inizializzare il cluster all'interno della bounding box, è stato utilizzato un algoritmo di DBSCAN custom, il quale prende come argomenti la bounding box dello scan corrente e la point cloud dello scan successivo.\\
 Una volta determinati i punti interni alla bounding box, seleziona il cluster con più punti al suo interno, il quale rappresenta l'oggetto associato alla bounding box, e ne crea un nuovo bounding box.\\
