@@ -55,14 +55,11 @@ def updateBB(bbs, nSensor, i, nMethod):
     # loading the next scan
     pointcloud = pc.generatePointClouds(nSensor, i+1)
 
-    # saving pointcloud for display
-    oldPointcloud = pointcloud
-
     # displaying pointcloud of the next scan and the bounding boxes
     o3d.visualization.draw([pointcloud, *bbs], show_skybox = False)
 
     # Mapping between nMethod and the corresponding DBSCAN method
-    dbscanMethod = { 1: (dbscan1.customDBSCAN, (0.6, 1.5, 6)), 2: (dbscan2.customDBSCAN, (1.5, 5, 2.5)) }
+    dbscanMethod = { 1: (dbscan1.customDBSCAN, (0.6, 1.5, 5)), 2: (dbscan2.customDBSCAN, (1.5, 5, 1.3)) }
 
     if nMethod not in dbscanMethod:
         print("Invalid method")
@@ -82,25 +79,29 @@ def updateBB(bbs, nSensor, i, nMethod):
             boxes, clusters, expandedBox = result
             expandedBoxes.append(expandedBox)
         else:
-            boxes, clusters = result
+            boxes, clusters, expandedSphere = result
+            expandedBoxes.append(expandedSphere)
         
         if boxes:
             newBB.append(boxes)
             newClusters.append(clusters)
         
-    if nMethod == 1:
-        o3d.visualization.draw([pointcloud, *expandedBoxes], show_skybox = False)
+    o3d.visualization.draw([pointcloud, *expandedBoxes], show_skybox = False)
     
-
+    
+    #print("pointcloud", pointcloud)
+    #print("used points", newClusters)
     remainingPoints = findPointsOutsideBB(pointcloud, newClusters)
     discoveredBoxes = []
     
-    #TODO adjust the number of points to consider
-    #FIXME clustering is not working properly. It connects points that are not close to each other
+    #FIXME the last pointcloud is not considered entirely because, at first, it finds a little part of the object, put it gets deleted when it is discovered
+           #an overlapping box that deletes the previous one
     
     if len(remainingPoints.points) > 4:
 
-        labels = np.array(remainingPoints.cluster_dbscan(eps = 2.5, min_points = 5, print_progress = False))
+        #print("remaining points", remainingPoints)
+
+        labels = np.array(remainingPoints.cluster_dbscan(eps = 2, min_points = 5, print_progress = False))
         clusters = []
         for label in np.unique(labels):
             cluster_mask = labels == label
@@ -112,12 +113,12 @@ def updateBB(bbs, nSensor, i, nMethod):
                 discoveredBoxes.append(bb)
 
         for discovederedBox in discoveredBoxes:
-            print("discovered boxes", discoveredBoxes)
+            #print("discovered boxes", discoveredBoxes)
             newBB.append(discovederedBox)
-
+    
     removeOverlappingBoxes(newBB)
 
-    return newBB, oldPointcloud
+    return newBB, pointcloud
 
 def displayBoundingBoxes(bbs, pointcloud): # to display only the clustered points "pointcloud" must be changed in "*pointcloud"
     o3d.visualization.draw([pointcloud, *bbs], show_skybox=False) 
