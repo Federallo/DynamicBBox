@@ -79,9 +79,6 @@ def createBoundingBoxes(labels, points, expandedBox):
 
     if len(effectiveLabels) > 4: # because open3d requires at least 5 points to create a bounding box
 
-        uniqueClusterLabels, countClusterLabels = np.unique(labels, return_counts=True) # getting the unique cluster labels and their counts
-        mostFrequentClusterLabel = uniqueClusterLabels[np.argmax(countClusterLabels)] # getting the most frequent cluster label
-
         clusterPoints = o3d.geometry.PointCloud()
         clusterPoints.points = o3d.utility.Vector3dVector(points[labels == 1])
             
