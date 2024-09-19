@@ -1,6 +1,6 @@
-import pointcloud as pc
+import blensoranalysis as pc
 import dbscan_expand_bbox as dbscan1
-import dbscan_near_search as dbscan2
+import dbscan_sphere_bound as dbscan2
 import open3d as o3d
 import numpy as np
 import blensoranalysis
