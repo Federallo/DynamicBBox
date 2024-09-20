@@ -43,22 +43,20 @@ def customDBSCAN(pointcloud, boundingBox, bbExpansionFactor, eps, minPts):
 
     if points.any(): # checking if there are any points in the bounding box
 
-        nCluster = 0 # initializing the cluster label to assign to the points (so for example the first cluster will have label 0, the second 1, and so on. Each of them will have a group of points)
-
         for i in range(len(points)):
             if labels[i] == 1:
                 
                 neighbours = [j for j, point in enumerate(points) if np.linalg.norm(point - points[i]) < eps] # getting the neighbours of points[i] that are within eps distance
 
                 if len(neighbours) > minPts:
-                    labels = expandCluster(points, labels, neighbours, nCluster, eps, minPts)
+                    labels = expandCluster(points, labels, neighbours, eps, minPts)
 
         #returning new bounding box (/bounding boxes in case with the newly discovered clusters)
         return createBoundingBoxes(labels, points, boundingBox)
     else:
         return None, None, None
 
-def expandCluster(points, labels, neighbours, nCluster, eps, minPts):
+def expandCluster(points, labels, neighbours, eps, minPts):
 
     for j in neighbours:
         #checking if the current point is labeled as noise
