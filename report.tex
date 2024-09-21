@@ -14,17 +14,27 @@
 \usepackage{subcaption}
 \usepackage{caption}
 \usepackage{float}
+\usepackage{hyperref}
 \graphicspath{ {./images/} }
 \captionsetup{font=footnotesize}
-
+\makeindex
+\hypersetup{
+    colorlinks,
+    citecolor=black,
+    filecolor=black,
+    linkcolor=black,
+    urlcolor=black
+}
 
 \begin{document}
 \justifying
 
-\section*{Introduzione}
+\tableofcontents
+\newpage
+\section{Introduzione}
 %Inserire introduzione
 
-\section*{Tecnologie utilizzate}
+\section{Tecnologie utilizzate}
 Nella seguente sezione saranno elencate le tecnologie utilizzate per lo sviluppo del progetto. Alcune di esse, non facendo direttamente parte dello scopo del progetto, verranno passate in rassegna più rapidamente.
 \subsection{LiDAR}
 LiDAR, o Light Detection and Ranging, rappresenta uno strumeto di telerilevamento che determina la distanza di un oggetto o superfice tramite l'utilizzo di impulsi laser.\\
@@ -73,7 +83,7 @@ La pointcloud è una struttura dati che rappresenta un insieme di punti nello sp
 	\footnotesize
 	\caption{Esempio di pointcloud filtrata, senza noise e sottocampionata}
 \end{figure}\\
-\subsubsection*{Sottocampionamento}
+\subsubsection{Sottocampionamento}
 Essendo il costo di campionamento delle pointcloud molto elevato a causa dell'alta densità di punti, è stato necessario sottocampionarle per avere una approssimazione accettabile in tempi ridotti. Attraverso \textit{pointcloud.voxeldownsample(size)}  viene sottocampionata la pointcloud attraverso cubi di lato \textit{size}. Questi ultimi dividono lo spazio 3D in griglie e se ciascun cubo presenta una serie di punti, ne verrà mantenuto uno solo.
 \begin{figure}[H]
 	\centering
@@ -81,7 +91,7 @@ Essendo il costo di campionamento delle pointcloud molto elevato a causa dell'al
 	\footnotesize
 	\caption{Esempio di processo di sottocampionamento della pointcloud}
 \end{figure}
-\subsubsection*{Clustering}
+\subsubsection{Clustering}
 Open3D dispone di un algoritmo di clustering, \textit{pointcloud.cluster\_dbscan(eps, min\_points, print\_progress)}, che permette di clusterizzare i punti della pointcloud.\\
 E' un metodo di raggruppamento di punti che si basa sulla distanza tra di essi e su un numero di punti minimo prestabilito che sta a indicare la presenza di un cluster.\\
 Ovviamente questo metodo viene sfruttato solo in due situazioni nel progetto: per la prima creazione delle bounding box e per la clusterizzazione di punti esterni alle bounding box.
@@ -103,11 +113,11 @@ Nel nostro caso è stata utilizzata la bounding box di tipo OBB, in quanto la pi
 Open3D offre la possibilità di creare le bounding box a partire dalla pointcloud utilizzando il metodo \textit{pointcloud.get\_oriented\_bounding\_box)}, il quale ritorna un oggetto
 \textit{geometry.OrientedBoundingBox}.\\
 Le \textit{OrientedBoundingBox} possiedono l'attributo per assegnargli un colore, e cioè \textit{obb.color = [r,g,b]}.
-\subsubsection*{Punti interni alla bounding box}
+\subsubsection{Punti interni alla bounding box}
 Siccome all'interno del programma sarà necessario aggiornare le bounding box nel modo più rapido possibile. La funzione\\ \textit{OrientedBoundingBox.get\_point\_indices\_within\_bounding\_box(pointcloud.points)} ha permesso di individuare gli indici dei punti interni alla bounding box presa in analisi dal programma in quell'istante di tempo, da cui poi creare il nuovo cluster e aggiornarla.\\ 
 Essenzialmente analizza un insieme punti della pointcloud dati come argomento alla funzione (in questo caso \textit{pointcloud.points}) e ritorna un array di indici relativi ai punti di quest'ultima. Un punto viene considerato interno alla bounding box se, proiettato sui tre assi, risulta compreso tra i valori minimi e massimi determinati attraverso l'attributo \textit{extent} della OBB.\\
 Questo metodo è ottimizzato per pointcloud di grandi dimensioni e garantisce un'ottima accuratezza nell'individuare i punti.
-\subsubsection*{Centro, estensione e orientazione della bounding box}
+\subsubsection{Centro, estensione e orientazione della bounding box}
 L'oggetto \textit{geometry.OrientedBoundingBox} dispone di tre attributi fondamentali:
 \begin{itemize}
 	\item center: rappresenta il centroide della bounding box.
@@ -159,7 +169,7 @@ Sono presenti inoltre parametri che permettono una visualizzazione più personal
 Le rappresentazioni tramite interfaccia grafica sono state sfruttate soprattutto per mostrare i passaggi che effettua il programma.
 
 \newpage
-\section*{Alogirtmi}
+\section{Alogirtmi}
 Nella seguente sezione verranno trattati i principali algoritmi implementati per il progetto.
 \subsection{Clustering}
 Il clustering è un metodo di Unsupervised Learning che raggruppa un insieme di oggetti in classi simili. Tali classi possono essere di tipo morfologico, cromatico o basata sulle densità degli oggetti.\\
@@ -226,7 +236,7 @@ Dati come assi di riferimento i tre cartesiani:
 \end{itemize}
 Se gli overlap massimi di ciascun asse sono maggiori degli overlap minimi, allora siginfica che le bounding box si sovrappongono e quindi viene rimossa quella che ha volume minore. Questo valore è ottenuto dalla funzione \textit{get\_volume()} che calcola il volume della bounding box come prodotto delle lunghezze dei tre lati.\\
 
-\section*{Progetto}
+\section{Progetto}
 Lo scopo del progetto consiste nell'aggiornare le bounding box generate inizialmente dall'algoritmo della repository \textit{blensor\_analysis} in modo da ottimizzare la clusterizzazione delle pointcloud interne alle bounding box. A seconda delle necessità, la clusterizzazione delle pointcloud in istanti successivi viene effettuata o all'interno di bounding box espanse oppure all'interno di sfere.\\
 I principali parametri che ne determineranno le prestazioni sono il tempo di esecuzione e la precisione delle bounding box.\\ 
 Il programma è strutturato nella seguente maniera:
@@ -325,7 +335,7 @@ A livello visivo, verranno mostrate le seguenti situazioni:
 \end{itemize}
 
 \newpage
-\section*{Esiti}
+\section{Esiti}
 Avendo preso in anlisi una situazione ideale di traffico, e cioè che i veicoli sono abbastanza distanziati da non causare errori nella creazione dei punti core e che non variano la direzione bruscamente, si ha che le bounding box aggiornate sono molto precise e che il tempo di esecuzione è sufficientemente basso.\\
 \subsection{Tempo di esecuzione}
 Per poter avere una stima temporale del programma, è stata sfruttata la libreria \textit{time} di Python.\\
@@ -384,7 +394,7 @@ Considerando una situazione in cui la frenquenza di aggiornamento dei sensori è
 Questa considerazione può essere più impattante nelle situazioni in cui i veicoli si muovono in modo brusco e in direzioni diverse, in quanto il metodo di espansione delle bounding box potrebbe non essere in grado di reagire adeguatamente. Se si ha invece una sfera come riferimento è più probabile che includa eventuali punti in maniera più corretta.\\
 
 \newpage
-\section*{Conclusioni}
+\section{Conclusioni}
 Il progetto ha permesso di analizzare le bounding box di una pointcloud utilizzando due approcci differenti.\\
 Rispetto alla normale clusterizzazione di open3d, non si nota un netto miglioramento nel tempo di creazione dei clustering. Questo è dovuto soprattutto al fatto che, anche se abbiamo un insieme di punti già clusterizzati, è necessario che venghino comunque rianalizzati affinché i punti che dovranno essere inglobati in questi cluster rispettino i concetti di \textit{density-connected} e \textit{core point}, come spiegato nel pargrafo relativo al clustering.\\
 Inoltre, essendo una mole di dati elevata, il programma avrebbe giovato da una maggiore potenza di calcolo, soprattutto da parte di una scheda grafica. Non a caso vengono sfruttate soprattutto le schede video per elaborare grandi quantità di dati in tempo reale nella guida autonoma.\\
