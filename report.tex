@@ -66,7 +66,7 @@ La tesi è strutturate come segue: la prima parte sarà dedicata ad approfondire
 Nella seguente sezione saranno elencate le tecnologie utilizzate per lo sviluppo del progetto. Alcune di esse, non facendo direttamente parte dello scopo del progetto, verranno passate in rassegna più rapidamente.
 \section{LiDAR}
 LiDAR, o Light Detection and Ranging, rappresenta uno strumeto di telerilevamento che determina la distanza di un oggetto o superfice tramite l'utilizzo di impulsi laser.\\
-Il risultato di tale processo è una pointcloud.\\
+Il risultato di tale processo è una pointcloud \cite{LiDAR}.\\
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=0.9\textwidth]{LiDAR}
@@ -96,7 +96,7 @@ Nel nostro caso è risultato cruciale in quanto è stato possibile sfruttare alg
 \end{figure}\\
 La simulazione tramite Blensor genera un file .csv per ogni istante e contiene le coordinate dei punti della pointcloud (senza rumore e filtrati, dove quest'ulitmo termina indica che vengono rimossi quei punti che rappresentano il terreno).
 \section{Open3D}
-Open3D è una libreria open-source che dispone di funzionalità grafiche per programmi Python e C++. Le principali features sono:
+Open3D è una libreria open-source che dispone di funzionalità grafiche per programmi Python e C++\cite{Open3D}. Le principali features sono:
 \begin{itemize}
 	\item la possibilità di creare strutture dati 3D
 	\item la presenza di algoritmi di data processing in 3D utilizzabili 
@@ -196,6 +196,14 @@ Sono presenti inoltre parametri che permettono una visualizzazione più personal
 \end{figure}\\
 Le rappresentazioni tramite interfaccia grafica sono state sfruttate soprattutto per mostrare i passaggi che effettua il programma.
 
+\section{blensor\_analysis}
+blensor\_analysis rappresenta la repository di partenza da cui è stato sviluppato il progetto. Nel codice, però, vengono prima importate le pointcloud e poi vengono clusterizzate e generate le bounding box, tenendo traccia della traitteoria dei vari oggetti in movimento. Perciò, sono stati sfruttati solo alcuni aspetti, tra cui:
+\begin{itemize}
+	\item BLENSOR: rappresenta la directory che contiene tutti i file .csv delle pointcloud generate da una quantità sensori che arriva al massimo a 5.
+	\item dataset\_loader: rappresenta il modulo che genera le pointcloud a partire dai file .csv e le restituisce come lista di punti.
+	\item pointcloud: è il modulo che si occupa di generare le effettive pointcloud sottocampionate e filtrate, clusterizzandole e generando le relative bounding box.
+\end{itemize}
+
 \newpage
 \chapter{Alogirtmi}
 Nella seguente sezione verranno trattati i principali algoritmi implementati per il progetto.
@@ -230,7 +238,7 @@ I passi principali dell'algoritmo sono:
 	\footnotesize
 	\caption{Clustering di una pointcloud tramite DBSCAN}	
 \end{figure}\\
-Rappresenta un algoritmo molto resistente a noise e può individuare cluster di forma arbitraria. La complessità dell'algoritmo è quadratica ($O(n^2)$)\\
+Rappresenta un algoritmo molto resistente a noise e può individuare cluster di forma arbitraria. La complessità dell'algoritmo è quadratica ($O(n^2)$)\cite{DBSCAN}.\\
 Come accennato in precedenza, nel caso del progetto viene utilizzato solo per clusterizzare le pointcloud all'avvio del programma e ogni volta che ci sono nuove pointcloud da analizzare e non hanno una bounding box associata.
 \subsection{DBSCAN personalizzato}
 L'algoritmo di DBSCAN personalizzato, rispetto a quello originale, prende in considerazione dei punti già clusterizzati come punto di partenza e che completasse la creazione di un solo cluster per volta.\\
@@ -431,5 +439,17 @@ Delle possibili migliorie nelle tecniche di clustering possono essere la riduzio
 Per quanto riguarda la prima considerazione, essendo dipendente soprattuto dalle elevate dimensioni dei file .csv dai quali il programma importa le pointcloud (hanno un peso di circa 11MB), questa procedura verrebbe eseguita istantaneamente da sensori fisici, senza la necessità di dover leggere delle informazioni da dei file. Quindi questo tipo di problema non si porrebbe più. Ma comunque una possibile modifica sarebbe quella di pre-filtrare le coordinate dei punti che rappresentano il terreno.\\
 Per la seconda considerazione invece si potrebbe implementare un sistema di spostamento delle bounding box in base alla velocità dei veicoli e alla loro direzione di marcia. Argoverse fornisce già questo tipo di informazioni, quindi una possibile applicazione può essere quando vengono caricate le nuove pointcloud e solo in quel momento le bounding box vengono spostate a seconda dei due parametri citati in precedenza.\\
 Questa integrazione è utile soprattutto nelle possbili situazioni di traffico intenso, dove i veicoli sono a stretto contatto. Il rischio che si va a correre in questi scenari, dato che tutti i punti all'interno della bounding box vengono labelizzati a priori, è quello di considerare cluster anche parte di un oggetto che si trova internamente alla bounding box, ma che in realtà non vi dovrebbe appartenere in quanto parte di un altro oggetto.\\
+
+\newpage
+\chapter*{Grazie di Cuore}
+
+\newpage
+\chapter*{Bibliografia}
+\addcontentsline{toc}{chapter}{Bibliografia}
+\begin{thebibliography}{9}
+	\bibitem{LiDAR} \href{https://it.wikipedia.org/wiki/Lidar}{Wikipedia. Lidar. 2024.}
+	\bibitem{Open3D} \href{http://www.open3d.org/}{Open3D: A Modern Library for 3D Data Processing.}
+	\bibitem{DBSCAN} \href{https://www.geeksforgeeks.org/dbscan-clustering-in-ml-density-based-clustering/}{Geek for Geeks. DBSCAN Clustering in ML. 2024.}
+\end{thebibliography}
 
 \end{document}
