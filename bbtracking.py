@@ -7,26 +7,20 @@ import blensoranalysis
 
 # NOTE: the bounding boxes of the custom cluster must be OrientedBoudingBox type, the same as the ones in blensory_analysis repo
 
-def findPointsOutsideBB(pointcloud, clusters):
+def findPointsOutsideBB(pointcloud, bbs):
     
-    # creating a mask to remove all the existing clusters from pointcloud
-    set1 = set(tuple(point) for point in pointcloud.points)
-    if clusters:
-        set2 = set(tuple(point) for cluster in clusters for point in cluster.points)
-        points = set1 - set2
-        
-        remainingPoints = np.array([np.array(point) for point in points])
-        if remainingPoints.any():
-            pointcloud = o3d.geometry.PointCloud()
-            pointcloud.points = o3d.utility.Vector3dVector(remainingPoints)
-            '''
-            print("printing new pointcloud")
-            for pts in pointcloud.points:
-                print(pts)
-            print("end")
-            '''
+    indices = set()
 
-        return pointcloud
+    # creating a mask to remove all the existing clusters from pointcloud
+    for bb in bbs:
+        indices.update(bb.get_point_indices_within_bounding_box(pointcloud.points))
+
+    # creating a mask to remove all the existing bounding boxes from pointcloud
+    mask = np.ones(len(pointcloud.points), dtype=bool)
+    mask[list(indices)] = False
+
+    return np.asarray(pointcloud.points)[mask]
+
 
 def removeOverlappingBoxes(bbs):
     
@@ -84,33 +78,35 @@ def updateBB(bbs, nSensor, i, nMethod):
         
         if boxes:
             newBB.append(boxes)
-            newClusters.append(clusters)
         
     o3d.visualization.draw([pointcloud, *expandedBoxes], show_skybox = False)
     
     
-    #print("pointcloud", pointcloud)
-    #print("used points", newClusters)
-    remainingPoints = findPointsOutsideBB(pointcloud, newClusters)
+    remainingPoints = findPointsOutsideBB(pointcloud, newBB)
     discoveredBoxes = []
     
     #FIXME the last pointcloud is not considered entirely because, at first, it finds a little part of the object, put it gets deleted when it is discovered
            #an overlapping box that deletes the previous one
     
-    if len(remainingPoints.points) > 4:
+    if len(remainingPoints) > 4:
+    
+        remainingPointCloud = o3d.geometry.PointCloud()
+        remainingPointCloud.points = o3d.utility.Vector3dVector(remainingPoints)
 
-        #print("remaining points", remainingPoints)
 
-        labels = np.array(remainingPoints.cluster_dbscan(eps = 2, min_points = 5, print_progress = False))
+        labels = np.array(remainingPointCloud.cluster_dbscan(eps = 2, min_points = 5, print_progress = False))
         clusters = []
         for label in np.unique(labels):
-            cluster_mask = labels == label
-            clusters.append(remainingPoints.select_by_index(np.where(cluster_mask)[0]))
+            if label != -1:
+                cluster_mask = labels == label
+                clusters.append(remainingPointCloud.select_by_index(np.where(cluster_mask)[0]))
         for cluster in clusters:
             if len(cluster.points) > 4:
                 bb = cluster.get_oriented_bounding_box()
                 bb.color = [0, 1, 0]
                 discoveredBoxes.append(bb)
+
+        o3d.visualization.draw([pointcloud, *discoveredBoxes, *newBB], show_skybox = False)
 
         for discovederedBox in discoveredBoxes:
             #print("discovered boxes", discoveredBoxes)
