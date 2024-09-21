@@ -12,8 +12,10 @@
 \usepackage{sidecap}
 \usepackage{graphicx}
 \usepackage{subcaption}
+\usepackage{caption}
 \usepackage{float}
 \graphicspath{ {./images/} }
+\captionsetup{font=footnotesize}
 
 
 \begin{document}
@@ -154,10 +156,9 @@ Sono presenti inoltre parametri che permettono una visualizzazione più personal
 	\footnotesize
 	\caption{Esempio di interfaccia grafica di Open3D, con tabella di menu a destra}
 \end{figure}\\
-
-
 Le rappresentazioni tramite interfaccia grafica sono state sfruttate soprattutto per mostrare i passaggi che effettua il programma.
 
+\newpage
 \section*{Alogirtmi}
 Nella seguente sezione verranno trattati i principali algoritmi implementati per il progetto.
 \subsection{Clustering}
@@ -251,19 +252,79 @@ Come detto in precedenza, si sta analizzando un incrocio di Pittsburgh, nel qual
 \end{figure}\\
 \subsection{importazione della prima scansione, generazione delle pointcloud e creazione delle prime bounding box}
 In questa fase iniziale del progetto viene sfruttato il modulo \textit{blensoranalysis} che invoca i principali metodi della repository \textit{blensor\_analysis} per importare la pointcloud iniziale dal rispettivo file \textit{.csv}, generando anche i cluster e le bounding box, e rendendendoli visibili tramite finestra generata da Open3D.\\
-In questo caso è stato deciso che le pointcloud venissero preventivamente filtrate, rimuovendo gli scan del terreno, e senza rumore, in quanto non fanno parte dello scopo del progetto.\\
+In questo caso è stato deciso che le pointcloud venissero preventivamente filtrate, rimuovendo gli scan del terreno, e senza rumore, in quanto non fanno parte dello scopo del progetto.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.7\textwidth]{blensor_analysis}
+	\footnotesize
+	\caption{Pointcloud e bounding box generate da blensor\_analysis}
+\end{figure}\\
 \subsection{aggiornamento delle bounding box a ogni scansione successiva}
 A questo punto vengono coinvolti i moduli \textit{bbtracking.py}, \textit{dbscan\_expand\_bbox.py} (o \textit{dbscan\_sphere\_bound.py}) e \textit{blensoranalysis} per l'aggiornamento delle bounding box.\\
 In \textit{bbtracking.py} vengono aggiornate le bounding box di partenza considerando la pointcloud dello scan successivo. Questi dati, insieme alle pointcloud degli scan successivi, sono ottentuti grazie ai metodi del modulo \textit{blensoranalysis}. Se durante il procedimento di aggiornamento delle bounding box una di esse contiene una porzione di pointcloud che non è abbastanza grande, allora viene eliminata e considerata noise.\\
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{0.45\textwidth}
+		\includegraphics[width=\textwidth]{bb}
+	\end{subfigure}
+	\begin{subfigure}{0.45\textwidth}
+		\includegraphics[width=\textwidth]{nobb}
+	\end{subfigure}
+	\footnotesize
+	\caption{Caso di cancellazione della bounding box}
+\end{figure}
+
 Se durante l'aggiornamento delle bounding box in un determinato istante si presenta una nuova pointcloud che non è associata a nessuna bounding box, allora verrà applicato il clustering di Open3d che genera una nuova bounding box alla quale verrà associato il colore verde. Se quest'ultima si sovrappone a una bounding box già presente, allora viene rimossa quella con volume minore.\\
+\begin{figure}[H]
+	\centering
+	\begin{subfigure}{0.45\textwidth}
+		\includegraphics[width=\textwidth]{overlap_remove_1}
+	\end{subfigure}
+	\begin{subfigure}{0.45\textwidth}
+		\includegraphics[width=\textwidth]{overlap_remove_2}
+	\end{subfigure}
+	\footnotesize
+	\caption{Cancellazione di overlapping tra bounding box}
+\end{figure}
+
 A livello visivo, verranno mostrate le seguenti situazioni:
 \begin{itemize}
 	\item quando si hanno le bounding box dell'iterazione corrente le bounding box dello scan succesivo.
-	\item quando si effettua l'operazione di espasione delle bounding box generando una buonding box ingrandita oppure una sfera.
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=0.5\textwidth]{startingpoint}
+			\footnotesize
+			\caption{Bounding box iniziali e scan successivo}
+		\end{figure}
+	\item quando si effettua l'operazione di espasione/trasformazione delle bounding box generando una buonding box ingrandita oppure una sfera.
+		\begin{figure}[H]
+			\centering
+			\begin{subfigure}{0.45\textwidth}
+				\includegraphics[width=\textwidth]{bbsExpanded}
+			\end{subfigure}
+			\begin{subfigure}{0.45\textwidth}
+				\includegraphics[width=\textwidth]{bbsToSphere}
+			\end{subfigure}
+			\footnotesize
+			\caption{Espansione di bounding box / creazione di sfere}
+		\end{figure}
 	\item quando si hanno nuovi cluster e quindi nuove bounding box.
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=0.5\textwidth]{discoveredClusters}
+			\footnotesize
+			\caption{Nuovo cluster scoperto e bounding box associata di colore verde}
+		\end{figure}
 	\item quando ogni pointcloud è stata correttamente clusterizzata e le bounding box sono state aggiornate corettamente.
+		\begin{figure}[H]
+			\centering
+			\includegraphics[width=0.5\textwidth]{perfectCluster}
+			\footnotesize
+			\caption{Creazione delle bounding box aggiornate}
+		\end{figure}
 \end{itemize}
 
+\newpage
 \section*{Esiti}
 Avendo preso in anlisi una situazione ideale di traffico, e cioè che i veicoli sono abbastanza distanziati da non causare errori nella creazione dei punti core e che non variano la direzione bruscamente, si ha che le bounding box aggiornate sono molto precise e che il tempo di esecuzione è sufficientemente basso.\\
 \subsection{Tempo di esecuzione}
@@ -322,6 +383,7 @@ In generale però si può notare che avere delle prime forme di cluster definite
 Considerando una situazione in cui la frenquenza di aggiornamento dei sensori è tale da far variare di poco lo spostamento degli oggeti, non si noterà grande differenza tra i due metodi di clusterizzazione personalizzata.\\
 Questa considerazione può essere più impattante nelle situazioni in cui i veicoli si muovono in modo brusco e in direzioni diverse, in quanto il metodo di espansione delle bounding box potrebbe non essere in grado di reagire adeguatamente. Se si ha invece una sfera come riferimento è più probabile che includa eventuali punti in maniera più corretta.\\
 
+\newpage
 \section*{Conclusioni}
 Il progetto ha permesso di analizzare le bounding box di una pointcloud utilizzando due approcci differenti.\\
 Rispetto alla normale clusterizzazione di open3d, non si nota un netto miglioramento nel tempo di creazione dei clustering. Questo è dovuto soprattutto al fatto che, anche se abbiamo un insieme di punti già clusterizzati, è necessario che venghino comunque rianalizzati affinché i punti che dovranno essere inglobati in questi cluster rispettino i concetti di \textit{density-connected} e \textit{core point}, come spiegato nel pargrafo relativo al clustering.\\
