@@ -1,4 +1,11 @@
-/_blensor_analysis
+/_blensor_analysis/open3d_env
+/_blensor_analysis/__pycache__
+/_blensor_analysis/.idea
+/_blensor_analysis/data.csv
+/_blensor_analysis/data_writer.py
+/_blensor_analysis/mainprogram.py
+/_blensor_analysis/tracking.py
+/_blensor_analysis/real_tracjectories.py
 /__pycache__
 report.pdf
 report.aux
