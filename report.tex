@@ -15,6 +15,7 @@
 \usepackage{caption}
 \usepackage{float}
 \usepackage{hyperref}
+\usepackage{helvet}
 \graphicspath{ {./images/} }
 \captionsetup{font=footnotesize}
 \makeindex
@@ -54,12 +55,12 @@
 \chapter*{Introduzione}
 \addcontentsline{toc}{chapter}{Introduzione}
 Negli ultimi anni la rapida evoluzione delle tecnologie dei sensori e l'aumento della potenza di calcolo dei computer ha portato a una crescita esponenziale dell'uso di dati tridimensionali in diversi campi, tra cui la robotica, la  guida autonoma e la computer vision.\\
-Le Point Cloud rappresentano un esempio di strumento per la rappresentazione e l'analisi di ambienti tridimensionali. Generate da sensori come LiDAR o telecamere stereoscopiche, le point cloud in movimento rappresentano un problema per la rilevazione e il tracking di oggetti in quanto richiede un'elaborazione in tempo reale. Le bounding box sono valido strumento per la rappresentazione di tali oggetti. Oltre a rispettare la forma dell'oggetto, devono essere anche in grado di adattarsi a cambiamenti di forma, dimensione o temporali.\\
+Le Point Cloud rappresentano un esempio di strumento per la rappresentazione e l'analisi di ambienti tridimensionali. Generate da sensori come LiDAR o telecamere stereoscopiche, le point cloud in movimento rappresentano un problema per la rilevazione e il tracking di oggetti in quanto richiedono un'elaborazione in tempo reale. Le bounding box sono valido strumento per la rappresentazione di tali oggetti. Oltre a rispettare la forma dell'oggetto, devono essere anche in grado di adattarsi a cambiamenti di forma e dimensione, o a cambiamenti temporali.\\
 \\
-Il progetto si pone l'obiettivo di sviluppare un algoritmo di clustering per point clouds in movimento, in modo da generare bounding box precise e adattabili a cambiamenti di forma e dimensione. In particolare, verrà approfondito il comportamento dell'algoritmo stesso, messo in relazione con uno fornito dalla libreria Open3D su Python.\\
+Il progetto si pone l'obiettivo di sviluppare un algoritmo di clustering per point clouds in movimento, in modo da generare bounding box precise e adattabili a cambiamenti di forma e dimensione. In particolare, verrà approfondito il comportamento dell'algoritmo stesso, mettendolo in relazione con uno fornito dalla libreria Open3D di Python.\\
 Il corretto aggiornamento delle bounding box rappresenta un passo cruciale per lo scopo del progetto, in quanto permette di avere una rappresentazione precisa degli oggetti in movimento.\\
 \\
-La tesi è strutturate come segue: la prima parte sarà dedicata ad approfondire le principali tecnologie utlizzate per lo sviluppo del progetto, la seconda invece sara dedicata agli algoritmi implementati. Nella terza parte verrà presentato il progetto, mentre nella quarta e quinta verranno mostrati gli esiti ottenuti e le conclusioni.
+La tesi è strutturata come segue: la prima parte sarà dedicata ad approfondire le principali tecnologie utlizzate per lo sviluppo del progetto, la seconda invece sarà dedicata agli algoritmi implementati. La terza parte sarà dedicata alla descrizione di tutti i passaggi del programma e nella quarta e quinta verranno mostrati gli esiti ottenuti e verrano tratte delle conclusioni.
 \newpage
 
 \chapter{Tecnologie utilizzate}
@@ -442,10 +443,21 @@ Questa integrazione è utile soprattutto nelle possbili situazioni di traffico i
 
 \newpage
 \chapter*{Grazie di Cuore}
+{\ssfamily\textit{
+Non ho mai avuto un percorso lineare nella mia vita a causa di una infanzia difficile. Spesso mi sono trovato ad affrontare situazioni inaspettate, in cui non avrei mai pensato di trovarmi. In quei momenti mi sentivo perso e non sapevo come uscirne. Durante il corso degli anni ho avuto la fortuna di avere amici e parenti che mi hanno aiutato ad affrontarle.\\
+\\
+In particolare, volevo ringraziare i miei cugini Alessandro e Giorgia, a cui devo tutto, per avermi reso indipendente e per avermi trattato come se fossi un loro fratello. Non dimenticherò mai ciò che mi avete insegnato, che è ormai alla base di ciò che sono adesso. Spero di rivedervi presto, mi mancate un sacco.\\
+\\
+Un ringraziamento va anche ai miei genitori, che nel loro piccolo sono sempre riusciti a non farmi mai mancare nulla durante la mia crescita. Ringrazio anche zia Mimma, zia Paola e Sonya che non mi hanno mai fatto mancare l'affetto di una famiglia.\\
+\\
+Un grazie a Ivan e Michele con cui ho sempre potuto parlare liberamente di tutto e mi sopportano ormai da anni.\\
+\\
+Grazie a Silenia, Lito e Christian che mi hanno aiutato a maturare ulteriormente senza mai chiedere nulla in cambio. Spero un giorno di poter ricambiare.\\
+\\
+Grazie a Francesco, Roberto e Matteo che mi hanno sempre tirato su di morale.
+}}
 
 \newpage
-\chapter*{Bibliografia}
-\addcontentsline{toc}{chapter}{Bibliografia}
 \begin{thebibliography}{9}
 	\bibitem{LiDAR} \href{https://it.wikipedia.org/wiki/Lidar}{Wikipedia. Lidar. 2024.}
 	\bibitem{Open3D} \href{http://www.open3d.org/}{Open3D: A Modern Library for 3D Data Processing.}
