@@ -1,10 +1,6 @@
 import numpy as np
 import open3d as o3d
 
-def findNeighoursWithinRadius(kdTree, points, radius):
-    [_, indices, _] = kdTree.search_radius_vector_3d(points, radius)
-    return indices
-
 def generatePointsAndLabels(pointcloud, boundingBox, expanseFactor):
 
     # getting the indices of the points within the bounding box
