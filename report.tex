@@ -124,6 +124,17 @@ Essendo il costo di campionamento delle pointcloud molto elevato a causa dell'al
 Open3D dispone di un algoritmo di clustering, \textit{pointcloud.cluster\_dbscan(eps, min\_points, print\_progress)}, che permette di clusterizzare i punti della pointcloud.\\
 E' un metodo di raggruppamento di punti che si basa sulla distanza tra di essi e su un numero di punti minimo prestabilito che sta a indicare la presenza di un cluster.\\
 Ovviamente questo metodo viene sfruttato solo in due situazioni nel progetto: per la prima creazione delle bounding box e per la clusterizzazione di punti esterni alle bounding box.
+\subsection{K-D Tree}
+Il K-D Tree (o K-Dimensional Tree) è una struttura dati che permette di effettuare ricerche in spazi multidimensionali in maniera efficiente, sfruttando il concetto di albero binario. Open3D dispone di una classe \textit{geometry.KDTreeFlann()} che permette di creare un K-D Tree a partire da una pointcloud.\\
+Rispetto a una normale ricerca sequenziale, il K-D Tree riduce i tempi di ricerca da $O(n)$ a $O(log(n))$. Ciò è dovuto soprattutto al fatto che vengono eliminati quei sotto-alberi di punti che si trovano a una distanza superiore a quella data. Un limite del K-D Tree è che necessita spazi di dimensione bassa (e quindi per uno spazio tridimensionale va più che bene) per poter effettuare le ricerche in tempi bassi.
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=0.5\textwidth]{3dtree}
+	\footnotesize
+	\caption{Suddisione di uno spazio 3D in un K-D Tree}
+\end{figure}\\
+In questo progetto è stato sfruttato nel clustering per trovare i punti vicini a un punto dato. Attraverso il metodo \textit{KDTreeFlann().search\_radius\_vector\_3d(point, radius)}, vengono restituiti gli indici dei punti della pointcloud che si trovano a una distanza minore di \textit{radius} dal punto dato.
+
 \subsection{Bounding Box}
 Le Bounding Box sono rettangoli (o parallelepipedi in 3D) che racchiudono un insieme di punti della pointcloud.\\
 Esistono tre categorie di bounding box:
@@ -242,21 +253,21 @@ I passi principali dell'algoritmo sono:
 Rappresenta un algoritmo molto resistente a noise e può individuare cluster di forma arbitraria. La complessità dell'algoritmo è quadratica ($O(n^2)$)\cite{DBSCAN}.\\
 Come accennato in precedenza, nel caso del progetto viene utilizzato solo per clusterizzare le pointcloud all'avvio del programma e ogni volta che ci sono nuove pointcloud da analizzare e non hanno una bounding box associata.
 \subsection{DBSCAN personalizzato}
-L'algoritmo di DBSCAN personalizzato, rispetto a quello originale, prende in considerazione dei punti già clusterizzati come punto di partenza e che completasse la creazione di un solo cluster per volta.\\
+L'algoritmo di DBSCAN personalizzato, rispetto a quello originale, prende in considerazione dei punti già clusterizzati come punto di partenza e ne completa la creazione.\\
 Quindi, partendo da delle bounding box già inizializzate (che vengono distinte dal colore verde) e dalla pointcloud di uno scan successivo, l'algoritmo compie i seguenti passaggi:
 \begin{itemize}
-	\item data la bounding box, individua gli indici dei punti interni sfruttando la funzione \textit{get\_point\_indices\_within\_bounding\_box()} che chiameremo \textbf{punti core}.
+	\item data una bounding box, individua gli indici dei punti interni sfruttando la funzione \textit{get\_point\_indices\_within\_bounding\_box()} che chiameremo \textbf{punti core}.
 	\item a seconda del metodo di clusterizzazione scelto espande/ trasforma la bounding box in due modi differenti.
 		\begin{itemize}
-			\item dbscan\_expand\_bbox: espande la bounding box creandone una nova aumentata di una percentuale prestabilita e riutilizza la funzione citata precedentemente per ottenere gli indici dei nuovi punti.
-			\item dbscan\_sphere\_bound: genera una sfera con centro nel centroide della bounding box e di raggio pari alla dimensione maggiore della bounding box per un fattore di espansione dato in input, diviso due 					per indicare il raggio. Successivamente individua gli indici dei punti interni alla sfera.
+			\item dbscan\_expand\_bbox: espande la bounding box creandone una nova aumentata di un valore prestabilito e riutilizza la funzione citata precedentemente per ottenere gli indici dei nuovi punti.
+			\item dbscan\_sphere\_bound: genera una sfera con centro nel centroide della bounding box e di raggio pari alla dimensione maggiore della bounding box per un fattore di espansione dato in input, diviso due 					(la divisione serve a indicare il raggio). Successivamente individua gli indici dei punti interni alla sfera.
 		\end{itemize}
-	\item una volta deifiniti questi due set di indici, istanzia un array di label delle stesse dimensioni del numero di indici dei punti generati dal file \textit{dbscan\_expand\_bbox} o \textit{dbscan\_sphere\_bound} e vengono settati a -1, per indicare che sono noise. Successivamente setta a 1 tutti quegli indici che sono presenti anche nei \textbf{punti core}.
-	\item a questo punto viene applicato l'effettivo algoritmo dbscan, con la differenza che parte dai punti che hanno label 1 (cioè che sono già considerati appartenenti a un cluster) e cerca ricorsivamente i punti vicini e clusterizza quelli che hanno label -1.
-	\item la lista di label viene sfruttata per creare un solo cluster, dal quale si genera la bounding box aggiornata e sarà colorata di rosso.
+	\item una volta deifiniti questi due set di indici, istanzia un array di label delle stesse dimensioni del numero di indici dei punti generati dal file \textit{dbscan\_expand\_bbox} o \textit{dbscan\_sphere\_bound} e vengono settati a -1, per indicare che sono noise. Successivamente setta a 1 tutti quegli indici che sono presenti nei \textbf{punti core}.
+	\item a questo punto viene applicato l'effettivo algoritmo dbscan, con la differenza che parte dai punti che hanno label 1 (cioè che sono già considerati appartenenti a un cluster) e cerca e clusterizza quelli che hanno label -1.
+	\item la lista di label viene sfruttata per creare un solo cluster, dal quale si genererà la bounding box aggiornata di colore rosso, che indica che si sta tenendo traccia di quell'oggetto.
 	\item se in uno scan successivo il numero minimo di punti per formare un cluster è troppo basso, l'oggetto non viene più seguito e viene cancellata la bounding box associata.
 \end{itemize}
-Con questo approccio, si pressuppone che si possa clusterizzare le pointcloud in maniera più efficace rispetto all'algoritmo implementato da open3d in quanto si parte con luster già avviati.\\
+Con questo approccio, si pressuppone che si possa clusterizzare le pointcloud in maniera più efficace in quanto si parte con luster già avviati.\\
 \section{Intersezione di bounding box}
 Avendo la possibilità di clusterizzare pointcloud esterne alle bounding box, può capitare che in un istante precedente si abbia una bounding box che contiene solo parte di un oggetto (in quanto il veicolo sta ancora entrando nel range dei sensori) e che in un istante successivo si abbia una nuova bounding box che contiene la parte restante, o l'oggetto completo, ma che comunque si sovrappone alla precedente.\\
 \begin{figure}[H]
@@ -376,19 +387,18 @@ A livello visivo, verranno mostrate le seguenti situazioni:
 Avendo preso in anlisi una situazione ideale di traffico, e cioè che i veicoli sono abbastanza distanziati da non causare errori nella creazione dei punti core e che non variano la direzione bruscamente, si ha che le bounding box aggiornate sono molto precise e che il tempo di esecuzione è sufficientemente basso.\\
 \section{Tempo di esecuzione}
 Per poter avere una stima temporale del programma, è stata sfruttata la libreria \textit{time} di Python.\\
-Il tempo di esecuzione è stato calcolato tenendo conto del tempo di caricamento della pointcloud e del tempo di esecuzione dell'algoritmo di clusterizzazione e di aggiornamento delle bounding box.\\
-Per avere una metodo di paragone, è stato calcolato anche il tempo di esecuzione del programma che ha eseguito soltanto la clusterizzazione tramite Open3D.\\
-Per ogni esecuzione sono stati analizzati 5 scan eseguiti da 1 a 5 sensori. Attraverso questi 5 scan è stato calcolto il tempo di esecuzione medio\\
+Il tempo di esecuzione è stato calcolato tenendo conto del tempo di esecuzione dell'algoritmo di clusterizzazione e di aggiornamento delle bounding box.\\
+Per ogni esecuzione è stata calcolata la media temporale di 4 scan eseguiti da 1 a 5 sensori.\\
 Ovviamente, maggiore è il numero di sensori e maggiore sarà il tempo di esecuzione richiesto.\\
 \begin{tikzpicture}
 	\begin{axis}[
 		title={Tempo di esecuzione del programma},
 		xlabel={Numero di sensori},
-		ylabel={Tempo di esecuzione (s)},
+		ylabel={Tempo medio (s)},
 		xmin=1, xmax=5,
-		ymin=0, ymax=190,
+		ymin=0, ymax=0.20,
 		xtick={1,2,3,4,5},
-		ytick={0,20,40,60,80,100,120,140,160,180, 200},
+		ytick={0,0.05,0.10,0.15,0.20},
 		legend pos=north west,
 		ymajorgrids=true,
 		grid style=dashed,
@@ -403,42 +413,40 @@ Ovviamente, maggiore è il numero di sensori e maggiore sarà il tempo di esecuz
 		mark=square,
 		]
 		coordinates {
-			(1,5.521)(2,20.405)(3,47.537)(4,95.903)(5,184.660)
+			(1,0.03155684471130371)(2,0.07429736852645874)(3,0.1106995940208435)(4,0.13018083572387695)(5,0.1386846899986267)
 		};
 	\addplot[
 		color=red,
 		mark=square,
 		]
 		coordinates {
-			(1,4.999)(2,19.495)(3,51.556)(4,109.450)(5,181.146)
+			(1,0.034172677993774415)(2,0.08169527053833008)(3,0.11776213645935059)(4,0.1371220588684082)(5,0.14824330806732178)
 		};
-	\addplot[
-		color=green,
-		mark=square,
-		]
-		coordinates {
-			(1,5.535)(2,21.219)(3,53.987)(4,104.081)(5,178.993)
-		};
-	\legend{Espanione Bounding Box, Clusterizzazione Open3D, Sfera}
+%	\addplot[
+%		color=green,
+%		mark=square,
+%		]
+%		coordinates {
+%			(1,5.535)(2,21.219)(3,53.987)(4,104.081)(5,178.993)
+%		};
+	\legend{Espansione Bounding Box, Sfera}
 	\end{axis}
 \end{tikzpicture}\\
-Dal grafico si evince che per i primi due sensori il tempo di esecuzione varia molto poco tra i tre metodi, mentre per i sensori successivi si ha una differenza un po' più marcata.\\
-Infatti i metodi di clusterizzazione personlaizzata implementati dal programma mostrano un lieve miglioramento nei tempi di esecuzione soprattutto quando si arriva ad avere un numero di sensori superiore a 3.\\ 
-Ciò che può saltare all'occhio è come, raggiunti i 5 sensori, il tempo di esecuzione del programma che esegue l'espansione delle bounding box sia il più lungo di tutti. Questo può essere dovuto al fatto che durante la creazione delle bounding box espanse siano stati coinvolti un gran numero di punti, che hanno portato quindi a un rallentamento del programma.\\
-In generale però si può notare che avere delle prime forme di cluster definite dai punti interni delle bounding box di partenza ha portato a un miglioramento dei tempi di esecuzione in quanto i punti da clusterizzare sono molto meno.
+Dal grafico si evince che il tempo di esecuzione del programma è dell'ordine dei decimi di secondo, un valore più che accettabile dato che gli scan vengono eseguiti a una frequenza di 10Hz.\\
+Come previsto, il tempo di esecuzione aumenta all'aumentare del numero di sensori in quanto vengono rilevati più punti nella point cloud e, di conseguenza, anche più oggetti data la posizione dei sensori nell'incrocio.\\
+
 \section{precisione delle bounding box}
-Considerando una situazione in cui la frenquenza di aggiornamento dei sensori è tale da far variare di poco lo spostamento degli oggeti, non si noterà grande differenza tra i due metodi di clusterizzazione personalizzata.\\
+Dato che la frenquenza di aggiornamento dei sensori è tale da far variare di poco lo spostamento degli oggeti, non si noterà grande differenza tra i due metodi di clusterizzazione personalizzata.\\
 Questa considerazione può essere più impattante nelle situazioni in cui i veicoli si muovono in modo brusco e in direzioni diverse, in quanto il metodo di espansione delle bounding box potrebbe non essere in grado di reagire adeguatamente. Se si ha invece una sfera come riferimento è più probabile che includa eventuali punti in maniera più corretta.\\
 
 \newpage
 \chapter{Conclusioni}
-Il progetto ha permesso di analizzare le bounding box di una pointcloud utilizzando due approcci differenti.\\
-Rispetto alla normale clusterizzazione di open3d, non si nota un netto miglioramento nel tempo di creazione dei clustering. Questo è dovuto soprattutto al fatto che, anche se abbiamo un insieme di punti già clusterizzati, è necessario che venghino comunque rianalizzati affinché i punti che dovranno essere inglobati in questi cluster rispettino i concetti di \textit{density-connected} e \textit{core point}, come spiegato nel pargrafo relativo al clustering.\\
+Il progetto ha permesso di analizzare le bounding box di una pointcloud utilizzando due approcci differenti. Nonostante i buoni risultati, l'algoritmo DBSCAN presenta dei limiti. Tali limiti sono dovuti soprattutto al fatto che, anche se abbiamo un insieme di punti già clusterizzati, è necessario che venghino comunque rianalizzati affinché i nuovi punti che dovranno essere inglobati in questi cluster rispettino i concetti di \textit{density-connected} e \textit{core point}, come spiegato nel pargrafo relativo al clustering.\\
 Inoltre, essendo una mole di dati elevata, il programma avrebbe giovato da una maggiore potenza di calcolo, soprattutto da parte di una scheda grafica. Non a caso vengono sfruttate soprattutto le schede video per elaborare grandi quantità di dati in tempo reale nella guida autonoma.\\
 \\
 Delle possibili migliorie nelle tecniche di clustering possono essere la riduzione del tempo di esecuzione e un sistema di spostamento delle bounding box in base a come si muovono nello spazio.\\
-Per quanto riguarda la prima considerazione, essendo dipendente soprattuto dalle elevate dimensioni dei file .csv dai quali il programma importa le pointcloud (hanno un peso di circa 11MB), questa procedura verrebbe eseguita istantaneamente da sensori fisici, senza la necessità di dover leggere delle informazioni da dei file. Quindi questo tipo di problema non si porrebbe più. Ma comunque una possibile modifica sarebbe quella di pre-filtrare le coordinate dei punti che rappresentano il terreno.\\
-Per la seconda considerazione invece si potrebbe implementare un sistema di spostamento delle bounding box in base alla velocità dei veicoli e alla loro direzione di marcia. Argoverse fornisce già questo tipo di informazioni, quindi una possibile applicazione può essere quando vengono caricate le nuove pointcloud e solo in quel momento le bounding box vengono spostate a seconda dei due parametri citati in precedenza.\\
+Per quanto riguarda la prima considerazione, essendo dipendente soprattuto dalle elevate dimensioni dei file .csv dai quali il programma importa le pointcloud (hanno un peso di circa 11MB), questa procedura verrebbe eseguita istantaneamente da sensori fisici, senza la necessità di dover leggere delle informazioni da dei file. Quindi questo tipo di problema non si porrebbe più. Ma comunque, trovandosi in un ambiente di testing, può sempre tornare utile e una possibile modifica sarebbe quella di pre-filtrare le coordinate dei punti che rappresentano il terreno.\\
+Per la seconda considerazione invece si potrebbe implementare un sistema di spostamento delle bounding box in base alla velocità dei veicoli e alla loro direzione di marcia. Tali informazioni possono essere estrapolate considerando l'andamento dei veicoli di cui si sta tenendo traccia nei vari scan.\\
 Questa integrazione è utile soprattutto nelle possbili situazioni di traffico intenso, dove i veicoli sono a stretto contatto. Il rischio che si va a correre in questi scenari, dato che tutti i punti all'interno della bounding box vengono labelizzati a priori, è quello di considerare cluster anche parte di un oggetto che si trova internamente alla bounding box, ma che in realtà non vi dovrebbe appartenere in quanto parte di un altro oggetto.\\
 
 \newpage
