@@ -35,24 +35,29 @@ def customDBSCAN(pointcloud, boundingBox, eps, minPts, expanseFactor):
 
     if points.any(): # checking if there are any points in the bounding box
 
+        ptcld = o3d.geometry.PointCloud()
+        ptcld.points = o3d.utility.Vector3dVector(points)
+        kdtree = o3d.geometry.KDTreeFlann(ptcld)
+
         for i in range(len(points)):
             if labels[i] == 1:
 
                             
-                neighbours = [j for j, point in enumerate(points) if np.linalg.norm(point - points[i]) < eps] # getting the neighbours of points[i] that are within eps distance
+                #neighbours = [j for j, point in enumerate(points) if np.linalg.norm(point - points[i]) < eps] # getting the neighbours of points[i] that are within eps distance
+                neighbours = kdtree.search_radius_vector_3d(points[i], eps)[1]
 
                 if len(neighbours) < minPts:
                     labels[i] = -1 # labeling point as noise because it doesn't have enough neighbours
                 else:
                     #nCluster += 1
-                    labels, points = expandCluster(points, labels, neighbours, eps, minPts, pointcloud, expanseFactor)
+                    labels, points = expandCluster(points, labels, neighbours, eps, minPts, pointcloud, expanseFactor, kdtree)
 
         #returning new bounding box (/bounding boxes in case with the newly discovered clusters)
         return createBoundingBoxes(labels, points, sphere)
     else:
         return None, None, None
 
-def expandCluster(points, labels, neighbours, eps, minPts, pointcloud, expanseFactor):
+def expandCluster(points, labels, neighbours, eps, minPts, pointcloud, expanseFactor, kdtree):
 
     # assing the current point to a cluster
     #labels[i] = nCluster
@@ -63,9 +68,10 @@ def expandCluster(points, labels, neighbours, eps, minPts, pointcloud, expanseFa
             labels[j] = 1 #nCluster
 
             #seraching for new neighbours to add to "neighbours" variable
-            newNeighbours = [k for k, point in enumerate(points) if np.linalg.norm(point - points[j]) < eps]
+            #newNeighbours = [k for k, point in enumerate(points) if np.linalg.norm(point - points[j]) < eps]
+            newNeighbours = kdtree.search_radius_vector_3d(points[j], eps)[1]
             if len(newNeighbours) >= minPts:
-                neighbours += newNeighbours
+                neighbours = np.concatenate([neighbours, newNeighbours])
 
     return labels, points
 
