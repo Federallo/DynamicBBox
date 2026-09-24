@@ -27,8 +27,8 @@ CSV files &#8594; dataset_loader &#8594; PointClud (voxel downsample) &#8594; DB
 For each existing bounding box:
 1. **`OBB.get_point_indices_within_bounding_box()`** is used for core points extraction
 2. The region is expanded using two alternative strategies:
-   - Expand BBox: enlarge OBB by fixed margin, re-query internal points
-   - Sphere Bound: create sphere at centroid with radius = max(extent) x expansion_factor
+   - `dbscan_expand_bbox`: enlarge OBB by fixed margin, re-query internal points
+   - `dbscan_sphere_bound`: create sphere at centroid with radius = max(extent) x expansion_factor
 3. A custom DBSCAN algorithm is applied which seeds with core points (label=1) and expands to neighbors (label=-1) via KD-Tree radius search
 4. New OBB are created from resulting cluster (red = tracked)
 5. A pairwise OBB intersection test is applied to remove smaller volume box, in order to resolve potential overlaps
@@ -37,11 +37,18 @@ To detect new objects, the application runs Open3D DBSCAN on unassigned points a
 Finally, all the boxes that are below a minimum point threshold are removed.
 ### 3. Visualization
 From real-time Open3D window, it is shown
-- Current frame point cloud
-- Previous bboxes (green)
-- Expanded regions / spheres
-- Updated bboxes (red)
-- New detections (green)
+- Current frame point cloud            
+  <img src="images/Pointcloud.png" width="400">
+- Previous bboxes       
+  <img src="images/startingpoint.png" width="400">
+- Expanded regions          
+  <img src="images/bbsExpanded.png" width="400">          
+  or spheres                  
+  <img src="images/bbsToSphere.png" width="400">
+- Updated bboxes (red)               
+  <img src="images/perfectCluster.png" width="400">
+- New detections (green)                      
+  <img src="images/discoveredClusters.png" width="400">
 ## Main clustering strategies
 | Strategy | Description | Pros | Cons |
 |----------|-------------|------|------|
