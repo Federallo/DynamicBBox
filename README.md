@@ -67,12 +67,10 @@ From real-time Open3D window, it is shown
 3. **Dense traffic risk** - pre-labeling all internal points can merge adjacent vehicles
 ## Future work
 - **NumPy vectorization** — replace Python loops with vectorized NumPy operations and batch indexing for memory/speed
-- **Motion prediction** - Kalman filter / constant-velocity for bbox propagation
+- **Motion prediction** - Constant-velocity for bbox propagation
 - **GPU acceleration** - PyTorch / CuPy / Open3D tensor ops for KD-Tree and DBSCAN
-- **Multi-object data association** - Hungarian algorithm for ID consistency
 - **Ground removal optimization** - pre-filter terrain points before clustering
-- **Real sensor integration** — ROS 2 node subscribing to `sensor_msgs/PointCloud2`
-- **Benchmark on real datasets** — nuScenes / Waymo evaluation
+- **Real sensor integration**
 ## References
 - Ester et al., *A Density-Based Algorithm for Discovering Clusters in Large Spatial Databases with Noise* (DBSCAN, 1996)
 - [Open3D: A Modern Library for 3D Data Processing](http://www.open3d.org/)
